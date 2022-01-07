@@ -8,6 +8,14 @@ warnings.filterwarnings("ignore")
 class BaseGBDT:
 
     def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
+
+        """
+        param learning_rate: learning rate
+        param max_depth: max depth of the decision tree
+        param max_tree_nums: the number of the boosting trees
+        param loss: the loss type (SquaresError, BinomialDeviance, MultinomialDeviance)
+        """
+
         self.learning_rate = learning_rate
         self.max_depth = max_depth
         self.max_tree_nums = max_tree_nums
@@ -18,6 +26,8 @@ class BaseGBDT:
     def _build_gbdt(self, dataset, tree_array):
         data = dataset.getData()
         self.f_0 = self.loss.initialize_f_0(data)
+        
+        #If not at init stage, cut the GBDT array for multiple tree arrays
         if len(tree_array) != 0:
             cut_tree_array = [tree_array[i:i+self.max_depth - 1] for i in range(0,len(tree_array),self.max_depth - 1)]
 

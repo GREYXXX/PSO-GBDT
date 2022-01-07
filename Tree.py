@@ -5,6 +5,16 @@ import random
 class Node(object):
 
     def __init__(self, merge, remain_indexs, id, loss, depth, parent):
+
+        """
+        param merge: tuple of (feature, feature value)
+        param remain_indexs: indexs of dataset remains at the current node
+        param id: id number of the current node
+        param loss: the loss type (SquaresError, BinomialDeviance, MultinomialDeviance)
+        param depth: depth of the current node
+        param parent: parent node
+        """
+
         self.id = id
         self.merge = merge
         self.remain_indexs = remain_indexs
@@ -22,27 +32,41 @@ class Node(object):
             return False
 
     def update_predict_value(self, data, targer_name, label_name):
+        """
+        Update the predict value for the leaf nodes
+        """
         self.predict_value = self.loss.update_leaf_values(data[targer_name], data[label_name])
 
 
 class Tree(object):
 
-    def __init__(self, dataset, target_name, loss, tree_input, max_depth, tree_id, tree_type = 'oblivious'):
+    def __init__(self, dataset, target_name, loss, tree_input, max_depth, tree_id):
+
+        """
+        param dataset : dataset -->(class DataSet)
+        param target_name : column name used to identify the round of the residual (e.g. f_0, res_1, f_2, res_2 ...)
+        param max_depth: max depth of the tree
+        param tree_input: an array of a tree, [] represents the init stage, else build the tree with this array
+        param tree_id: id of the current tree
+        """
+
         self.target_name = target_name
         self.loss = loss
         self.max_depth = max_depth
         self.tree_input = tree_input
-        self.tree_type = tree_type
         self.tree_id = tree_id
         self.id =0
         self.leaf_nodes = []
+
+        #tree_array is used to record the internal nodes
         self.tree_array = []
         self.data = dataset
         self.data._encodeTable()
 
-        #Get lookup tables in tree class
+        #Get lookup tables
         self.lookup_tables = self.data.getLookupTable()
 
+        #if tree_input not [], get the merge --> (feature, feature value)
         if len(tree_input) != 0:
             merge = self.lookup_tables[self.tree_input[0]]
         else:
@@ -50,18 +74,24 @@ class Tree(object):
 
         data = self.data.getData()
         self.root = Node(merge, data.index, self.id, self.loss, 0, None)
-        #print(tree_input)
+
 
     def getRandomElement(self):
         return self.data.getRandomElement()
 
     def getLeftRemainIndexs(self, df, feature, feature_value):
+        """
+        Get the remain indexs for the left child node
+        """
         if df[feature].dtype != 'object':
             return list(df[df[feature] < feature_value].index)
         else:
             return list(df[df[feature] != feature_value].index)
     
     def getRightRemainIndexs(self, df, feature, feature_value):
+        """
+        Get the remain indexs for the right child node
+        """
         if df[feature].dtype != 'object':
             return list(df[df[feature] >= feature_value].index)
         else:

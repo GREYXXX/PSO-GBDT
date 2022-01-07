@@ -41,7 +41,7 @@ class Particle:
 
 	# set the new velocity (sequence of swap operators)
     def setVelocity(self, new_velocity):
-	    self.velocity = new_velocity
+        self.velocity = new_velocity
 
 	# returns the velocity (sequence of swap operators)
     def getVelocity(self):
@@ -110,6 +110,7 @@ class PSO():
 
         #Init the particles
         self.init_swarm()
+        print(max(self.particles, key=attrgetter('pbest_solution')).getCostPBest())
         
     
     def init_swarm(self):
@@ -197,7 +198,7 @@ class PSO():
                 cost_current_solution = self.get_fitness(self.gbdt)
                 # updates the cost of the current solution
                 par.setCostCurrentSolution(cost_current_solution)
-                print(cost_current_solution, iter)
+                print(solution_particle, cost_current_solution, iter)
 
                 # checks if current solution is pbest solution
                 if cost_current_solution > par.getCostPBest():

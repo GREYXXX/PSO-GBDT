@@ -7,6 +7,10 @@ from data import DataSet
 import random
 from pso import PSO
 
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn import tree as sktree
+
 df = pd.read_csv('data/credit.data.csv')
 dataset = DataSet(df)
 dataset._encodeTable()
@@ -31,12 +35,11 @@ def run():
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
 
 def pso_run():
-    """dataset, iterations, size_population, c1, c2, w, max_tree_nums=5, model_type='regression', beta=1, alfa=1"""
+    """dataset, iterations, size_population, max_tree_nums=5, model_type='regression', beta=1, alfa=1"""
     pso = PSO(dataset, 10, 50,  max_tree_nums=5, model_type='binary_cf', beta=0.5, alfa=0.5)
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.getGBest().getPBest(), pso.getGBest().getCostPBest()))
 
 
-
-# pso_run()
-run()
+pso_run()
+# run()
