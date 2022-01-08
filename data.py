@@ -1,10 +1,11 @@
 import pandas as pd
 import random
+from sklearn.utils import shuffle
 
 class DataSet:
 
     def __init__(self, df):
-        self.df = df
+        self.df = shuffle(df)
         self.columns = self.df.columns[:-1]
 
     def _encodeTable(self):
@@ -16,6 +17,15 @@ class DataSet:
 
     def getData(self):
         return self.df
+
+    def getTrainData(self):
+        return self.df[:int(self.df.shape[0] * 0.7)]
+
+    def getValData(self):
+        return self.df[int(self.df.shape[0] * 0.7):int(self.df.shape[0] * 0.85)]
+    
+    def getTestData(self):
+        return self.df[int(self.df.shape[0] * 0.85):]
     
     def getLength(self):
         return len(self.df)

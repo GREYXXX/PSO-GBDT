@@ -72,7 +72,7 @@ class Tree(object):
         else:
             merge = self.getRandomElement()
 
-        data = self.data.getData()
+        data = self.data.getTrainData()
         self.root = Node(merge, data.index, self.id, self.loss, 0, None)
 
 

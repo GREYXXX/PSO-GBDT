@@ -59,7 +59,8 @@ class SquaresError(LossFunction):
 class BinomialDeviance(LossFunction):
 
     def initialize_f_0(self, data):
-        pos = sum(data['label'] == -1)
+        #Todo: should chage the lable each time
+        pos = sum(data['label'] == 1)
         neg = data.shape[0] - pos
         f_0 = np.log(pos / neg)
         data['f_0'] = f_0

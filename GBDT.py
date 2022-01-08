@@ -24,7 +24,7 @@ class BaseGBDT:
         self.trees = {}
 
     def _build_gbdt(self, dataset, tree_array):
-        data = dataset.getData()
+        data = dataset.getTrainData()
         self.f_0 = self.loss.initialize_f_0(data)
         
         #If not at init stage, cut the GBDT array for multiple tree arrays
@@ -94,9 +94,9 @@ class GBDTBinaryClassifier(BaseGBDT):
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
             data[f_m_name] = data[f_prev_name] + \
-                            (self.learning_rate * \
-                            data.apply(lambda x : self.trees[iter].predictInstance(x), axis=1))
-
+                            self.learning_rate * \
+                            data.apply(lambda x : self.trees[iter].predictInstance(x), axis=1)            
+        
         data['predict_value'] = data[f_m_name]
         data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
         data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else -1)
