@@ -30,6 +30,7 @@ dataset = DataSet(df)
 print("encode start...")
 dataset._encodeTable()
 print("encode done...")
+lookup_tables = dataset.getLookupTable()
 
 def sklearn_train():
     X = df.drop('Swarm_Behaviour', axis=1)
@@ -52,6 +53,7 @@ def run():
     array = gbdt.getGBDTArray()
     random.shuffle(array)
     print(gbdt.getGBDTArray())
+    print([lookup_tables[i] for i in gbdt.getGBDTArray()])
     print(gbdt.getGBDTArrayAll())
 
     print("\n")

@@ -40,8 +40,8 @@ class BaseGBDT:
                     merge = dataset.getRandomElements(drops)
                     vals.append(dataset.getIndex(merge))
                     drops.append(merge[0])
-                
                 cut_tree_array.append(vals)
+
 
         for i in range(1, self.max_tree_nums + 1):
             self.loss.calculate_residual(data, i)

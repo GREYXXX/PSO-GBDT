@@ -55,9 +55,10 @@ class DataSet:
         columns = self.columns
         columns = columns.drop(drops)
         if columns.size == 0:
+            #This is the case if max_depth > Num of features, the columns will be 0 after .drop() 
             f = self.columns[random.randint(0, self.columns.size - 1)]
         else:
-            f = self.columns[random.randint(0, columns.size - 1)]
+            f = columns[random.randint(0, columns.size - 1)]
 
         fval =  self.df[f][random.randint(0, self.df.shape[0] - 1)]
         return (f, fval)
