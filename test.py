@@ -14,7 +14,7 @@ from sklearn.utils import shuffle
 
 df = pd.read_csv('data/credit.data.csv')
 # df = pd.read_csv('data/BankNote.csv')
-df = df.rename({'class': 'label'}, axis=1)
+# df = df.rename({'class': 'label'}, axis=1)
 dataset = DataSet(df)
 dataset._encodeTable()
 
@@ -41,7 +41,7 @@ def run():
 
 def pso_run():
     """dataset, iterations, size_population, max_tree_nums=5, model_type='regression', beta=1, alfa=1"""
-    pso = PSO(dataset, 5, 50,  max_tree_nums=5, model_type='binary_cf', beta=0.5, alfa=0.5)
+    pso = PSO(dataset, 5, 50,  max_tree_nums=5, model_type='binary_cf', beta=0.8, alfa=0.8)
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.getGBest().getPBest(), pso.getGBest().getCostPBest()))
     gbdt = GBDTBinaryClassifier(0.5, 4, 5, BinomialDeviance())

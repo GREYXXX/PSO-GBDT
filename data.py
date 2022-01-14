@@ -1,11 +1,31 @@
 import pandas as pd
 import random
 from sklearn.utils import shuffle
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
 
 class DataSet:
 
-    def __init__(self, df):
-        self.df = shuffle(df)
+    def __init__(self, df, standardize = False):
+        """Data preprocessing"""
+
+        #Make default col name of regression and binary classification called label
+        label_name = df.columns[-1]
+        if label_name != "label":
+            self.df = df.rename({label_name : 'label'}, axis=1)
+        else:
+            self.df = df
+
+        #For binary classification, use 0 as neg sample, 1 as pos sample
+        if len(pd.unique(self.df['label'])) == 2:
+            self.df['label'] = self.df['label'].apply(lambda x : int(0) if x <= 0 else int(1))
+        
+        #Nomalized the feature
+        if standardize:
+            self.df.iloc[:,0:-1] = scaler.fit_transform(self.df.iloc[:,0:-1].to_numpy())
+            print("Nomalized!")
+
+        self.df = shuffle(self.df)
         self.columns = self.df.columns[:-1]
 
     def _encodeTable(self):
@@ -19,13 +39,10 @@ class DataSet:
         return self.df
 
     def getTrainData(self):
-        return self.df[:int(self.df.shape[0] * 0.7)]
-
-    def getValData(self):
-        return self.df[int(self.df.shape[0] * 0.7):int(self.df.shape[0] * 0.85)]
+        return self.df[:int(self.df.shape[0] * 0.8)]
     
     def getTestData(self):
-        return self.df[int(self.df.shape[0] * 0.85):]
+        return self.df[int(self.df.shape[0] * 0.8):]
     
     def getLength(self):
         return len(self.df)

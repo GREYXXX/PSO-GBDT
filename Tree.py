@@ -84,18 +84,18 @@ class Tree(object):
         Get the remain indexs for the left child node
         """
         if df[feature].dtype != 'object':
-            return list(df[df[feature] < feature_value].index)
+            return df[df[feature] < feature_value].index
         else:
-            return list(df[df[feature] != feature_value].index)
+            return df[df[feature] != feature_value].index
     
     def getRightRemainIndexs(self, df, feature, feature_value):
         """
         Get the remain indexs for the right child node
         """
         if df[feature].dtype != 'object':
-            return list(df[df[feature] >= feature_value].index)
+            return df[df[feature] >= feature_value].index
         else:
-            return list(df[df[feature] == feature_value].index)
+            return df[df[feature] == feature_value].index
 
     def _build_tree(self, data):
         queue = [self.root]

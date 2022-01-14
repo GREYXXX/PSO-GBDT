@@ -126,7 +126,7 @@ class PSO():
 
     
     def get_fitness(self, gbdt):
-        data = self.dataset.getValData()
+        data = self.dataset.getTrainData()
         data = data[int(data.shape[0] * 0.8):]
         predict = gbdt.predict(data)
 

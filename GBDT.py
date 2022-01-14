@@ -99,7 +99,7 @@ class GBDTBinaryClassifier(BaseGBDT):
         
         data['predict_value'] = data[f_m_name]
         data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
-        data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else -1)
+        data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else 0)
 
         return data
 
