@@ -89,21 +89,21 @@ class Particle:
 
 class PSO():
 
-    def __init__(self, dataset, iterations, size_population, max_tree_nums=5, model_type='regression', beta=1, alfa=1):
+    def __init__(self, dataset, iterations, size_population, max_tree_nums=5, learning_rate = 0.3, max_tree_depth = 4, 
+                    model_type='regression', beta=1, alfa=1):
+
         self.dataset = dataset
         self.iterations = iterations
         self.size_population = size_population
         
         #The max tree numbers of GBDT
         self.max_tree_nums = max_tree_nums
+        self.learning_rate = learning_rate
+        self.max_tree_depth = max_tree_depth     #self.data.columns.size
         self.model_type = model_type
         self.particles = []
         self.beta = beta
         self.alfa = alfa
-
-        self.learning_rate = 0.5
-        self.max_tree_depth = 4     #self.data.columns.size
-
 
         if self.model_type == 'regression':
             self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
@@ -119,15 +119,17 @@ class PSO():
         
     
     def init_swarm(self):
+        print("Particle initialization start....")
         for i in range(self.size_population):
             self.gbdt._build_gbdt(self.dataset, [])
             solution = self.gbdt.getGBDTArray()
             self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            print("particle {} finished".format(i))
+        print("Particle initialization finished")
 
     
     def get_fitness(self, gbdt):
-        data = self.dataset.getValData()
-        data = data[int(data.shape[0] * 0.8):]
+        data = self.dataset.getTrainData()
         predict = gbdt.predict(data)
 
         if self.model_type == 'regression':
