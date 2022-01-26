@@ -130,10 +130,6 @@ class PSO():
     
     def get_fitness(self, gbdt):
         data = self.dataset.getTrainData()
-<<<<<<< HEAD
-        data = data[int(data.shape[0] * 0.8):]
-=======
->>>>>>> modify-3
         predict = gbdt.predict(data)
 
         if self.model_type == 'regression':

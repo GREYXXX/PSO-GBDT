@@ -13,12 +13,6 @@ from sklearn import tree as sktree
 from sklearn.utils import shuffle
 from sklearn.ensemble import GradientBoostingClassifier
 
-<<<<<<< HEAD
-df = pd.read_csv('data/credit.data.csv')
-# df = pd.read_csv('data/BankNote.csv')
-# df = df.rename({'class': 'label'}, axis=1)
-dataset = DataSet(df)
-=======
 # df = pd.read_csv('data/credit.data.csv')
 df = pd.read_csv('data/BankNote.csv')
 # df = pd.read_csv('data/classification.csv')
@@ -37,7 +31,6 @@ df = pd.read_csv('data/BankNote.csv')
 
 dataset = DataSet(df, standardize=False)
 print("encode start...")
->>>>>>> modify-3
 dataset._encodeTable()
 print("encode done...")
 lookup_tables = dataset.getLookupTable()
@@ -81,10 +74,6 @@ def run():
     
 
 def pso_run():
-<<<<<<< HEAD
-    """dataset, iterations, size_population, max_tree_nums=5, model_type='regression', beta=1, alfa=1"""
-    pso = PSO(dataset, 5, 50,  max_tree_nums=5, model_type='binary_cf', beta=0.8, alfa=0.8)
-=======
     """dataset, iterations, size_population, max_tree_nums=5, learning_rate = 0.3, max_tree_depth = 4, model_type='regression', beta=1, alfa=1"""
 
     iterations=10
@@ -95,7 +84,6 @@ def pso_run():
 
     pso = PSO(dataset, iterations=iterations, size_population=size_population,  max_tree_nums=max_tree_nums, learning_rate = learning_rate, 
                                 max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.5, alfa=0.5)
->>>>>>> modify-3
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.getGBest().getPBest(), pso.getGBest().getCostPBest()))
 
@@ -112,4 +100,3 @@ def pso_run():
 # sklearn_train()
 pso_run()
 # run()
-
