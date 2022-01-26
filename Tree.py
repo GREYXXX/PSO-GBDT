@@ -63,7 +63,7 @@ class Tree(object):
         self.data = dataset
 
         #Get lookup tables
-        self.lookup_tables = self.data.getLookupTable()
+        self.lookup_tables = self.data.get_lookup_table()
 
         #Get the merge --> (feature, feature value) or raise error
         if len(tree_input) == self.max_depth:
@@ -72,14 +72,14 @@ class Tree(object):
             print("tree_input is {}, depth is {}".format(len(tree_input), self.max_depth))
             raise ValueError("Input tree error")
 
-        data = self.data.getTrainData()
+        data = self.data.get_train_data()
         self.root = Node(merge, data.index, self.id, self.loss, 0, None)
 
 
-    def getRandomElement(self):
-        return self.data.getRandomElement()
+    def get_random_element(self):
+        return self.data.get_random_element()
 
-    def getLeftRemainIndexs(self, df, feature, feature_value):
+    def get_left_remain_indexs(self, df, feature, feature_value):
         """
         Get the remain indexs for the left child node
         """
@@ -88,7 +88,7 @@ class Tree(object):
         else:
             return df[df[feature] != feature_value].index
     
-    def getRightRemainIndexs(self, df, feature, feature_value):
+    def get_right_remain_indexs(self, df, feature, feature_value):
         """
         Get the remain indexs for the right child node
         """
@@ -97,7 +97,7 @@ class Tree(object):
         else:
             return df[df[feature] == feature_value].index
 
-    def _build_tree(self, data):
+    def build_tree(self, data):
         queue = [self.root]
         # print("tree {} start".format(self.tree_id))
         while (len(queue) != 0):         
@@ -118,8 +118,8 @@ class Tree(object):
 
                 feature = current_node.merge[0]
                 feature_value = current_node.merge[1]
-                left_index = self.getLeftRemainIndexs(current_data, feature, feature_value)
-                right_index = self.getRightRemainIndexs(current_data, feature, feature_value)
+                left_index = self.get_left_remain_indexs(current_data, feature, feature_value)
+                right_index = self.get_right_remain_indexs(current_data, feature, feature_value)
                 self.id += 1
                 if current_node.left == None:
                     current_node.left = Node(merge, left_index, self.id, self.loss, current_node.depth + 1, current_node)
@@ -167,15 +167,15 @@ class Tree(object):
             predict_values.append(self.leaf_nodes[int(str, 2)].predict_value)
         return predict_values
 
-    def getRules(self):
+    def get_rules(self):
         return [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
 
-    def predictInstance(self, instance, rules):
+    def predict_instance(self, instance, rules):
         """
         Get the predict result for an DataFrame instance
         """
 
-        df = self.data.getData()
+        df = self.data.get_data()
         str = ''
         for rule in rules:
             if df[rule[0]].dtype != 'object':
@@ -191,37 +191,37 @@ class Tree(object):
         return self.leaf_nodes[int(str, 2)].predict_value
             
 
-    def getTreeArray(self):
+    def get_tree_array(self):
         """
         Encode the oblivous tree as an array made by (feature, feature_val) --> key (only one each level)
         """
-        return [self.data.getIndex(self.tree_array[2**i - 1].merge) for i in range(self.max_depth)]
+        return [self.data.get_index(self.tree_array[2**i - 1].merge) for i in range(self.max_depth)]
     
-    def getTreeArrayAll(self):
+    def get_tree_array_all(self):
         """
         Encode the oblivous tree as an array made by (feature, feature_val) --> key (all nodes at each level)
         """
-        return [self.data.getIndex(node.merge) for node in self.tree_array]
+        return [self.data.get_index(node.merge) for node in self.tree_array]
 
-    def getTreeNodes(self):
+    def get_tree_nodes(self):
         """
         Encode the oblivous tree as an array made by nodes --> Class Node()
         """
         return [node for node in self.tree_array]
     
-    def getLeafNodes(self):
+    def get_leaf_nodes(self):
         """
         Get the predict value for every leaf nodes
         """
         return [node.predict_value for node in self.leaf_nodes]
 
-    def getNodesNums(self):
+    def get_nodes_nums(self):
         """
         Get the number of remain indexs of each node
         """
         return sum([len(node.remain_indexs) for node in self.leaf_nodes])
 
-    def checkNodesNums(self):
+    def check_nodes_nums(self):
         """
         Check the correctness 
         """

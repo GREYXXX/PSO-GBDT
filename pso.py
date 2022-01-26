@@ -37,51 +37,51 @@ class Particle:
         self.velocity = []
 
 
-    def setPBest(self, new_pbest):
+    def set_pbest(self, new_pbest):
         """set pbest"""
         self.pbest =  new_pbest
     
-    def getPBest(self):
+    def get_pbest(self):
         """returns the pbest """
         return self.pbest
 
-    def setVelocity(self, new_velocity):
+    def set_velocity(self, new_velocity):
          """set the new velocity (sequence of swap operators)"""
          self.velocity = new_velocity
 
-    def getVelocity(self):
+    def get_velocity(self):
         """returns the velocity (sequence of swap operators)"""
         return self.velocity
     
-    def setCurrentSolution(self, solution):
+    def set_current_solution(self, solution):
         """set current solution"""
         self.solution = solution
 
-    def getCurrentSolution(self):
+    def get_current_solution(self):
         """get current solution"""
         return self.solution
 
-    def setCostPBest(self, fitness):
+    def set_cost_pbest(self, fitness):
         """set fitness value for pbest solution"""
         self.pbest_solution_fit = fitness
 
-    def getCostPBest(self):
+    def get_cost_pbest(self):
         """gets fitness value of pbest solution"""
         return self.pbest_solution_fit
 
-    def setCostCurrentSolution(self, fitness):
+    def set_cost_current_solution(self, fitness):
         """set fitness value for the current solution"""
         self.current_solution_fit = fitness
 
-    def getCostCurrentSolution(self):
+    def get_cost_current_solution(self):
         """gets fitness value of the current solution"""
         return self.current_solution_fit
 
-    def getParticleID(self):
+    def get_particle_id(self):
         """get particle's id"""
         return self.id
 
-    def clearVelocity(self):
+    def clear_velocity(self):
         """removes all elements of the list velocity"""
         del self.velocity[:]
 
@@ -121,15 +121,15 @@ class PSO():
     def init_swarm(self):
         print("Particle initialization start....")
         for i in range(self.size_population):
-            self.gbdt._build_gbdt(self.dataset, [])
-            solution = self.gbdt.getGBDTArray()
+            self.gbdt.build_gbdt(self.dataset, [])
+            solution = self.gbdt.get_gbdt_array()
             self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
 
     
     def get_fitness(self, gbdt):
-        data = self.dataset.getTrainData()
+        data = self.dataset.get_train_data()
         predict = gbdt.predict(data)
 
         if self.model_type == 'regression':
@@ -151,18 +151,18 @@ class PSO():
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
             self.gbest = max(self.particles, key=attrgetter('pbest_solution_fit'))
-            print("gbest is :{} at {} iter".format(self.gbest.getCostPBest(), iter))
+            print("gbest is :{} at {} iter".format(self.gbest.get_cost_pbest(), iter))
 
             for par in self.particles:
                 #calc fitness for each particle
                 #get local best pbest -- the best fitness value in each particle's memory
                 #get global best gbst -- the best fitness value accorss the whole population
 
-                par.clearVelocity() # cleans the speed of the particle
+                par.clear_velocity() # cleans the speed of the particle
                 temp_velocity = []
-                solution_gbest = self.gbest.getPBest() # gets solution of the gbest
-                solution_pbest = par.getPBest()[:] # gets the pbest solution
-                solution_particle = par.getCurrentSolution()[:] # gets the current solution of the particle
+                solution_gbest = self.gbest.get_pbest() # gets solution of the gbest
+                solution_pbest = par.get_pbest()[:] # gets the pbest solution
+                solution_particle = par.get_current_solution()[:] # gets the current solution of the particle
 
                 # generates all swap operators to calculate (pbest - x(t-1))
                 for i in range(len(solution_particle)):
@@ -183,7 +183,7 @@ class PSO():
                         temp_velocity.append(swap_operator)
 
                 
-                par.setVelocity(temp_velocity)
+                par.set_velocity(temp_velocity)
 
                 # generates new solution for particle
                 for swap_operator in temp_velocity:
@@ -201,23 +201,23 @@ class PSO():
                     raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
 
                 # updates the current solution
-                par.setCurrentSolution(solution_particle)
-                self.gbdt._build_gbdt(self.dataset, solution_particle)
+                par.set_current_solution(solution_particle)
+                self.gbdt.build_gbdt(self.dataset, solution_particle)
                 # gets cost of the current solution
                 cost_current_solution = self.get_fitness(self.gbdt)
                 # updates the cost of the current solution
-                par.setCostCurrentSolution(cost_current_solution)
+                par.set_cost_current_solution(cost_current_solution)
                 print(solution_particle, cost_current_solution, iter)
 
                 # checks if current solution is pbest solution
-                if cost_current_solution > par.getCostPBest():
-                    par.setPBest(solution_particle)
-                    par.setCostPBest(cost_current_solution)
+                if cost_current_solution > par.get_cost_pbest():
+                    par.set_pbest(solution_particle)
+                    par.set_cost_pbest(cost_current_solution)
 
             print("\n")
     
     # returns gbest (best particle of the population)
-    def getGBest(self):
+    def get_gbest(self):
         return self.gbest
     
 		

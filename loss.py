@@ -71,7 +71,6 @@ class BinomialDeviance(LossFunction):
         res_name = 'res_' + str(iter)
         f_prev_name = 'f_' + str(iter - 1)
         data[res_name] = data['label'] - 1 / (1 + data[f_prev_name].apply(lambda x: np.exp(-x)))
-        return sum(data[res_name])
 
     def update_f_m(self, data, trees, iter, learning_rate):
         f_prev_name = 'f_' + str(iter - 1)

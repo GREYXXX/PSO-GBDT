@@ -26,8 +26,8 @@ class BaseGBDT:
         self.tree_loss = []
         self.residuals = []
 
-    def _build_gbdt(self, dataset, tree_array):
-        data = dataset.getTrainData()
+    def build_gbdt(self, dataset, tree_array):
+        data = dataset.get_train_data()
         self.f_0 = self.loss.initialize_f_0(data)
         cut_tree_array= []
         
@@ -41,8 +41,8 @@ class BaseGBDT:
                 drops = []
                 vals = []
                 for _ in range(self.max_depth):
-                    merge = dataset.getRandomElements(drops)
-                    vals.append(dataset.getIndex(merge))
+                    merge = dataset.get_random_elements(drops)
+                    vals.append(dataset.get_index(merge))
                     drops.append(merge[0])
                 cut_tree_array.append(vals)
 
@@ -51,38 +51,38 @@ class BaseGBDT:
             self.residuals.append(self.loss.calculate_residual(data, i))
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
-            tree._build_tree(data)
+            tree.build_tree(data)
             self.trees[i] = tree
             self.loss.update_f_m(data, self.trees, i, self.learning_rate)
     
 
-    def getResiduals(self):
+    def get_residuals(self):
         """return residuals"""
         return self.residuals
 
-    def getTreesLoss(self):
+    def get_trees_loss(self):
         """return the loss of trees"""
         return self.tree_loss
 
-    def getGBDTArray(self):
+    def get_gbdt_array(self):
         """
         Encode the GBDT by (feature, feature_val) --> key 
         """
-        gbdt_array = [self.trees[i].getTreeArray() for i in range(1, len(self.trees) + 1)]
+        gbdt_array = [self.trees[i].get_tree_array() for i in range(1, len(self.trees) + 1)]
         return [i for item in gbdt_array for i in item]
     
-    def  getGBDTArrayAll(self):
+    def  get_gbdt_array_all(self):
         """
-        Encode the GBDT by (feature, feature_val) --> key, with calling getTreeArrayAll()
+        Encode the GBDT by (feature, feature_val) --> key, with calling get_tree_arrayAll()
         """
-        gbdt_array = [self.trees[i].getTreeArrayAll() for i in range(1, len(self.trees) + 1)]
+        gbdt_array = [self.trees[i].get_tree_array_all() for i in range(1, len(self.trees) + 1)]
         return [i for item in gbdt_array for i in item]
     
-    def getGBDTNodeArray(self):
+    def get_gbdt_node_array(self):
         """
         Encode the GBDT by node --> Class Node()
         """
-        gbdt_nodes_array = [self.trees[i].getTreeNodes() for i in range(1, len(self.trees) + 1)]
+        gbdt_nodes_array = [self.trees[i].get_tree_nodes() for i in range(1, len(self.trees) + 1)]
         return [i for item in gbdt_nodes_array for i in item]
 
 
@@ -96,10 +96,10 @@ class GBDTRegressor(BaseGBDT):
         for iter in range(1, self.max_tree_nums + 1):
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
-            rules = self.trees[iter].getRules()
+            rules = self.trees[iter].get_rules()
             data[f_m_name] = data[f_prev_name] + \
                             (self.learning_rate * \
-                            data.apply(lambda x : self.trees[iter].predictInstance(x, rules), axis=1))
+                            data.apply(lambda x : self.trees[iter].predict_instance(x, rules), axis=1))
         data['predict_value'] = data[f_m_name]
         return data
 
@@ -115,10 +115,10 @@ class GBDTBinaryClassifier(BaseGBDT):
             # print("iter {} start".format(iter))
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
-            rules = self.trees[iter].getRules()
+            rules = self.trees[iter].get_rules()
             data[f_m_name] = data[f_prev_name] + \
                             self.learning_rate * \
-                            data.apply(lambda x : self.trees[iter].predictInstance(x, rules), axis=1)            
+                            data.apply(lambda x : self.trees[iter].predict_instance(x, rules), axis=1)            
             # print("finished")
         data['predict_value'] = data[f_m_name]
         data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
@@ -132,7 +132,7 @@ class GBDTMultiClassifier(BaseGBDT):
     def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
         super().__init__(learning_rate, max_depth, max_tree_nums, loss)
 
-    def _build_gbdt(self, data):
+    def build_gbdt(self, data):
         self.classes = data['label'].unique().astype(str)
         self.loss.init_classes(self.classes)
         
@@ -151,7 +151,7 @@ class GBDTMultiClassifier(BaseGBDT):
             for class_name in self.classes:
                 target_name = 'res_' + class_name + '_' + str(iter)
                 tree = Tree(data, target_name, self.loss, max_depth = 4, tree_id = i)
-                tree._build_tree(data)
+                tree.build_tree(data)
                 self.trees[i][class_name] = tree
                 self.loss.update_f_m(data, self.trees, i, class_name, self.learning_rate)
 
@@ -165,7 +165,7 @@ class GBDTMultiClassifier(BaseGBDT):
                 f_m_name = 'f_' + class_name + '_' + str(iter)
                 data[f_m_name] = \
                     data[f_prev_name] + \
-                    self.learning_rate * data.apply(lambda x : self.trees[iter].predictInstance(x), axis=1)
+                    self.learning_rate * data.apply(lambda x : self.trees[iter].predict_instance(x), axis=1)
 
         data['sum_exp'] = data.apply(lambda x:
                                      sum([np.exp(x['f_' + i + '_' + str(iter)]) for i in self.classes]), axis=1)
@@ -187,13 +187,13 @@ class GBDTMultiClassifier(BaseGBDT):
                 label = class_name
         return label
 
-    def getGBDTArray(self):
+    def get_gbdt_array(self):
         """
         Encode the GBDT by (feature, feature_val) --> key 
         """
         pass
     
-    def getGBDTNodeArray(self):
+    def get_gbdt_node_array(self):
         """
         Encode the GBDT by node --> Class Node()
         """
