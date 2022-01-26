@@ -50,25 +50,25 @@ def sklearn_train():
         print("Accuracy score (validation): {0:.3f}".format(gb_clf.score(X_test, y_test)))
 
 def run():
-    gbdt = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 4, max_tree_nums= 4, loss = BinomialDeviance())
+    gbdt = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 3, max_tree_nums= 3, loss = BinomialDeviance())
     # gbdt = GBDTRegressor(0.1, 4, 2, SquaresError())
-    gbdt._build_gbdt(dataset, [])
+    gbdt.build_gbdt(dataset, [])
     array = gbdt.get_gbdt_array()
+    print(array)
     random.shuffle(array)
     # print([lookup_tables[i] for i in gbdt.get_gbdt_array()()])
-    print(gbdt.getTreesLoss())
+    # print(gbdt.get_trees_loss())
     print(gbdt.get_gbdt_array_all())
     predict = gbdt.predict(dataset.get_test_data())
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
 
     print("\n")
     print("shuffled: {}".format(array))
-    gbdt = GBDTBinaryClassifier(learning_rate= 0.5, max_depth= 4, max_tree_nums= 4, loss = BinomialDeviance())
-    gbdt._build_gbdt(dataset, array)
-    print(gbdt.get_trees_loss())
-    print(gbdt.get_gbdt_array_all)
+    gbdt_ = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 3, max_tree_nums= 3, loss = BinomialDeviance())
+    gbdt_.build_gbdt(dataset, array)
+    print(gbdt_.get_gbdt_array_all())
 
-    predict = gbdt.predict(dataset.get_test_data())
+    predict = gbdt_.predict(dataset.get_test_data())
     #print(((predict['predict_value'] - predict['label']) ** 2).mean() ** .5)
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
     
@@ -98,6 +98,6 @@ def pso_run():
 
 
 # sklearn_train()
-pso_run()
-# run()
+# pso_run()
+run()
 
