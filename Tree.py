@@ -61,16 +61,16 @@ class Tree(object):
         #tree_array is used to record the internal nodes
         self.tree_array = []
         self.data = dataset
-        self.data._encodeTable()
 
         #Get lookup tables
         self.lookup_tables = self.data.getLookupTable()
 
-        #if tree_input not [], get the merge --> (feature, feature value)
-        if len(tree_input) != 0:
+        #Get the merge --> (feature, feature value) or raise error
+        if len(tree_input) == self.max_depth:
             merge = self.lookup_tables[self.tree_input[0]]
         else:
-            merge = self.getRandomElement()
+            print("tree_input is {}, depth is {}".format(len(tree_input), self.max_depth))
+            raise ValueError("Input tree error")
 
         data = self.data.getTrainData()
         self.root = Node(merge, data.index, self.id, self.loss, 0, None)
@@ -99,29 +99,22 @@ class Tree(object):
 
     def _build_tree(self, data):
         queue = [self.root]
+        # print("tree {} start".format(self.tree_id))
         while (len(queue) != 0):         
             current_node = queue.pop(0)
             current_data = data.loc[current_node.remain_indexs]
+            self.tree_array.append(current_node) 
             #print(len(current_data), current_node.depth)
 
             #Internel node
-            if current_node.depth < self.max_depth - 1:
-                self.tree_array.append(current_node)  
+            if current_node.depth < self.max_depth - 1: 
 
                 #If current node's depth eaual to the last node's depth, use the last node rules (oblivous tree)
                 if current_node.parent == None:
-
-                    #If the length of tree_input is 0, at init process, randomly assign feature and feature_val
-                    if len(self.tree_input) == 0:
-                        merge = self.getRandomElement()
-                    else:
-                        merge = self.lookup_tables[self.tree_input[current_node.depth + 1]]
+                    merge = self.lookup_tables[self.tree_input[current_node.depth + 1]]
 
                 elif current_node.parent != None and current_node.depth != self.tree_array[-2].depth: 
-                    if len(self.tree_input) == 0 or current_node.depth == self.max_depth - 2:
-                        merge = self.getRandomElement()
-                    else:
-                        merge = self.lookup_tables[self.tree_input[current_node.depth + 1]]
+                    merge = self.lookup_tables[self.tree_input[current_node.depth + 1]]
 
                 feature = current_node.merge[0]
                 feature_value = current_node.merge[1]
@@ -145,6 +138,8 @@ class Tree(object):
 
                 current_node.update_predict_value(current_data, self.target_name, label_name)
                 self.leaf_nodes.append(current_node)
+        
+        # print("tree {} finished".format(self.tree_id))
 
 
     def predict(self, df):
@@ -172,13 +167,15 @@ class Tree(object):
             predict_values.append(self.leaf_nodes[int(str, 2)].predict_value)
         return predict_values
 
-    def predictInstance(self, instance):
+    def getRules(self):
+        return [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
+
+    def predictInstance(self, instance, rules):
         """
         Get the predict result for an DataFrame instance
         """
 
         df = self.data.getData()
-        rules = [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
         str = ''
         for rule in rules:
             if df[rule[0]].dtype != 'object':
@@ -198,7 +195,7 @@ class Tree(object):
         """
         Encode the oblivous tree as an array made by (feature, feature_val) --> key (only one each level)
         """
-        return [self.data.getIndex(self.tree_array[2**i - 1].merge) for i in range(self.max_depth - 1)]
+        return [self.data.getIndex(self.tree_array[2**i - 1].merge) for i in range(self.max_depth)]
     
     def getTreeArrayAll(self):
         """

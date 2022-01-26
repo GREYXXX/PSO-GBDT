@@ -71,6 +71,7 @@ class BinomialDeviance(LossFunction):
         res_name = 'res_' + str(iter)
         f_prev_name = 'f_' + str(iter - 1)
         data[res_name] = data['label'] - 1 / (1 + data[f_prev_name].apply(lambda x: np.exp(-x)))
+        return sum(data[res_name])
 
     def update_f_m(self, data, trees, iter, learning_rate):
         f_prev_name = 'f_' + str(iter - 1)
@@ -79,7 +80,7 @@ class BinomialDeviance(LossFunction):
         for leaf_node in trees[iter].leaf_nodes:
             data.loc[leaf_node.remain_indexs, f_m_name] += learning_rate * leaf_node.predict_value
         
-        #self.get_train_loss(data['label'], data[f_m_name], iter)
+        return self.get_train_loss(data['label'], data[f_m_name], iter)
 
     def update_leaf_values(self, targets, y):
         numerator = targets.sum()

@@ -28,7 +28,10 @@ class DataSet:
         self.df = shuffle(self.df)
         self.columns = self.df.columns[:-1]
 
+
     def _encodeTable(self):
+        """Make an hash table to bind the (feature, feature value)"""
+
         #Extract all unique feature values
         self.unique_values = [(col, list(pd.unique(self.df[col]))) for col in self.df.columns[:self.df.columns.get_loc('label')]]
         #Endcode the unique feature and feature values by (feature, feature value)
@@ -47,9 +50,24 @@ class DataSet:
     def getLength(self):
         return len(self.df)
 
+    def getRandomElements(self, drops):
+        """Return a random (feature, feature value)"""
+        columns = self.columns
+        columns = columns.drop(drops)
+        if columns.size == 0:
+            #This is the case if max_depth > Num of features, the columns will be 0 after .drop() 
+            f = self.columns[random.randint(0, self.columns.size - 1)]
+        else:
+            f = columns[random.randint(0, columns.size - 1)]
+
+        fval =  self.df[f][random.randint(0, self.df.shape[0] - 1)]
+        return (f, fval)
+
     def getRandomElement(self):
+        """Return a random (feature, feature value)"""
+
         # randomly pick up a feature
-        f = self.columns[:-1][random.randint(0, self.columns.size - 2)]
+        f = self.columns[random.randint(0, self.columns.size - 1)]
         # randomly pick up a feature value belongs to the feature
         fval =  self.df[f][random.randint(0, self.df.shape[0] - 1)]
         
@@ -57,6 +75,7 @@ class DataSet:
         #return self.merge_values[random.randint(0,len(self.merge_values) - 1)]
 
     def getIndex(self, value):
+        """Map the (feature, feature value) to a key value"""
         return self.merge_values.index(value)
 
     def getLookupTable(self):
