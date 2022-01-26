@@ -23,15 +23,19 @@ class BaseGBDT:
         self.loss = loss
         self.f_0 = {}
         self.trees = {}
+        self.tree_loss = []
+        self.residuals = []
 
     def _build_gbdt(self, dataset, tree_array):
         data = dataset.getTrainData()
         self.f_0 = self.loss.initialize_f_0(data)
-        cut_tree_array = []
+        cut_tree_array= []
         
-        #If not at init stage, cut the GBDT array for multiple tree arrays
+        # If not at init stage, cut the GBDT array for multiple tree arrays
         if len(tree_array) != 0:
             cut_tree_array = [tree_array[i:i+self.max_depth] for i in range(0,len(tree_array),self.max_depth)]
+        
+        # If at the init stage, randomly init the nodes of GBDT with different feature at every level
         else:
             for _ in range(self.max_tree_nums):
                 drops = []
@@ -42,15 +46,23 @@ class BaseGBDT:
                     drops.append(merge[0])
                 cut_tree_array.append(vals)
 
-
+        # Construct the GBDT
         for i in range(1, self.max_tree_nums + 1):
-            self.loss.calculate_residual(data, i)
+            self.residuals.append(self.loss.calculate_residual(data, i))
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
             tree._build_tree(data)
             self.trees[i] = tree
             self.loss.update_f_m(data, self.trees, i, self.learning_rate)
+    
 
+    def getResiduals(self):
+        """return residuals"""
+        return self.residuals
+
+    def getTreesLoss(self):
+        """return the loss of trees"""
+        return self.tree_loss
 
     def getGBDTArray(self):
         """

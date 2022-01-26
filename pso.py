@@ -189,7 +189,7 @@ class PSO():
                 for swap_operator in temp_velocity:
                     if random.random() <= swap_operator[2]:
                         # makes the swap
-                        solution_particle[0] = swap_operator[1]
+                        solution_particle[swap_operator[0]] = swap_operator[1]
                 
                 if self.model_type == 'regression':
                     self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
