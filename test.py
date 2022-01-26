@@ -98,6 +98,6 @@ def pso_run():
 
 
 # sklearn_train()
-# pso_run()
-run()
+pso_run()
+# run()
 
