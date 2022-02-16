@@ -29,7 +29,7 @@ class BaseGBDT:
     def build_gbdt(self, dataset, tree_array):
         data = dataset.get_train_data()
         self.f_0 = self.loss.initialize_f_0(data)
-        cut_tree_array= []
+        cut_tree_array = []
         
         # If not at init stage, cut the GBDT array for multiple tree arrays
         if len(tree_array) != 0:
