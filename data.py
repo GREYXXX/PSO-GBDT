@@ -30,20 +30,7 @@ class DataSet:
             print("Nomalized!")
 
         self.columns = self.train.columns[:-1]
-
-    # def __init__(self, x_train, y_train, x_test, y_test):
-    #     self.x_train = x_train
-    #     self.y_train = y_train
-    #     self.x_test = x_test
-    #     self.y_test = y_test
-   
-    #     # For binary classification, use 0 as neg sample, 1 as pos sample for the y_train
-    #     label_name = y_train.columns[0]
-    #     if len(pd.unique(self.y_train[label_name])) and len(pd.unique(self.y_test[label_name]))== 2:
-    #         self.y_train[label_name] = self.y_train[label_name].apply(lambda x : int(0) if x <= 0 else int(1))
-    #         self.y_test[label_name]  = self.y_test [label_name].apply(lambda x : int(0) if x <= 0 else int(1))
-        
-    #     self.columns = self.x_train.columns
+        self.df = pd.concat([self.train, self.test],axis=0,ignore_index=True)
 
 
     def encode_table(self):
@@ -56,8 +43,7 @@ class DataSet:
         self.lookup_tables = {i: self.merge_values[i] for i in range(len(self.merge_values))}
 
     def get_data(self):
-        df = pd.concat([self.train, self.test],axis=0,ignore_index=True)
-        return df
+        return self.df
 
     def get_train_data(self):
         return self.train

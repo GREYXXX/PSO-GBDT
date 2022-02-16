@@ -29,9 +29,10 @@ df = pd.read_csv('data/classification.csv')
 # df = pd.read_csv('data/Swarm_Behaviour.csv')
 
 train = df[:int(df.shape[0] * 0.8)]
-test  = df[int(df.shape[0] * 0.8):]
+test  = df[int(df.shape[0] * 0.2):]
 target_name = 'success'
 dataset = DataSet(train, test, target_name,standardize=False)
+
 print("encode start...")
 dataset.encode_table()
 print("encode done...")
@@ -80,7 +81,7 @@ def pso_run():
     """dataset, iterations, size_population, max_tree_nums=5, learning_rate = 0.3, max_tree_depth = 4, model_type='regression', beta=1, alfa=1"""
 
     iterations=10
-    size_population=20
+    size_population=30
     max_tree_nums=6
     learning_rate = 0.3
     max_tree_depth = 5
@@ -97,7 +98,6 @@ def pso_run():
     predict = gbdt.predict(dataset.get_test_data())
     #print the accuracy
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
-
 
 
 # sklearn_train()
