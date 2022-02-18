@@ -51,9 +51,13 @@ class BaseGBDT:
             self.residuals.append(self.loss.calculate_residual(data, i))
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
+            # print(f"tree {i} start")
             tree.build_tree(data)
+            # print(f"tree {i} finish")
             self.trees[i] = tree
+            # print(f"tree {i} update")
             self.loss.update_f_m(data, self.trees, i, self.learning_rate)
+            # print(f"tree {i} update finish")
     
 
     def get_residuals(self):
