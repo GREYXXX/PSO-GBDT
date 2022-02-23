@@ -2,6 +2,7 @@ from Tree import Tree
 import pandas as pd
 import math
 import warnings
+import time
 import numpy as np
 warnings.filterwarnings("ignore")
 
@@ -116,17 +117,18 @@ class GBDTBinaryClassifier(BaseGBDT):
     def predict(self, data):
         data['f_0'] = self.f_0
         for iter in range(1, self.max_tree_nums + 1):
-            # print("iter {} start".format(iter))
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
-            rules = self.trees[iter].get_rules()
-            data[f_m_name] = data[f_prev_name] + \
-                            self.learning_rate * \
-                            data.apply(lambda x : self.trees[iter].predict_instance(x, rules), axis=1)            
-            # print("finished")
-        data['predict_value'] = data[f_m_name]
-        data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
-        data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else 0)
+            leafs = self.trees[iter].predict(data)
+            data[f_m_name] = data[f_prev_name].values + (self.learning_rate * leafs)
+        
+        condlist   = [1 / (1 + np.exp(-data[f_m_name])) >= 0.5] 
+        choicelist = [1]
+        data['predict_label'] = np.select(condlist, choicelist, default = 0)
+
+        # data['predict_label'] = data[f_m_name].apply(lambda x: 1 if 1 / (1 + np.exp(-x)) >= 0.5 else 0)
+        # data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
+        # data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else 0)
 
         return data
 
