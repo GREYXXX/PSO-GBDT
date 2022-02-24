@@ -34,11 +34,17 @@ from sklearn.tree import DecisionTreeClassifier
 # df = pd.read_csv('data/Swarm_Behaviour.csv')
 # target_name = 'success'
 
-df = pd.read_csv("/Users/xirao/data/training_30.csv")
-df['Label'] = df['Label'].apply(lambda x : 1 if x == 's' else 0)
+# df = pd.read_csv("/Users/xirao/data/training_30.csv")
+# df['Label'] = df['Label'].apply(lambda x : 1 if x == 's' else 0)
+# train = df[:int(df.shape[0] * 0.8)]
+# test  = df[int(df.shape[0] * 0.8):]
+# target_name = 'label'
+
+df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
 train = df[:int(df.shape[0] * 0.8)]
 test  = df[int(df.shape[0] * 0.8):]
-target_name = 'Label'
+target_name = '54'
 
 
 dataset = DataSet(train, test, target_name,standardize=False)
