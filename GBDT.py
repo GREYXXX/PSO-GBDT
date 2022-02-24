@@ -52,13 +52,9 @@ class BaseGBDT:
             self.residuals.append(self.loss.calculate_residual(data, i))
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
-            # print(f"tree {i} start")
             tree.build_tree(data)
-            # print(f"tree {i} finish")
             self.trees[i] = tree
-            # print(f"tree {i} update")
             self.loss.update_f_m(data, self.trees, i, self.learning_rate)
-            # print(f"tree {i} update finish")
     
 
     def get_residuals(self):
@@ -125,10 +121,6 @@ class GBDTBinaryClassifier(BaseGBDT):
         condlist   = [1 / (1 + np.exp(-data[f_m_name])) >= 0.5] 
         choicelist = [1]
         data['predict_label'] = np.select(condlist, choicelist, default = 0)
-
-        # data['predict_label'] = data[f_m_name].apply(lambda x: 1 if 1 / (1 + np.exp(-x)) >= 0.5 else 0)
-        # data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
-        # data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else 0)
 
         return data
 

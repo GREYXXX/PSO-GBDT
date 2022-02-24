@@ -93,11 +93,6 @@ class Tree(object):
         else:
             return df[df[feature] != feature_value].index
         
-
-        # if df[feature].dtype != 'object':
-        #     return np.where(df[feature] < feature_value)[0]
-        # else:
-        #     return np.where(df[feature] != feature_value)[0]
     
     def get_right_remain_indexs(self, df, feature, feature_value):
         """
@@ -108,10 +103,6 @@ class Tree(object):
         else:
             return df[df[feature] == feature_value].index
 
-        # if df[feature].dtype != 'object':
-        #     return np.where(df[feature] >= feature_value)[0]
-        # else:
-        #     return np.where(df[feature] == feature_value)[0]
 
     def build_tree(self, data):
         queue = [self.root]
@@ -119,7 +110,6 @@ class Tree(object):
             current_node = queue.pop(0)
             current_data = data.loc[current_node.remain_indexs]
             self.tree_array.append(current_node) 
-            #print(len(current_data), current_node.depth)
 
             #Internel node
             if current_node.depth < self.max_depth - 1: 

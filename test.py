@@ -1,8 +1,3 @@
-from cProfile import label
-from urllib.request import urlretrieve
-from numpy import array
-from pyrsistent import b
-from torch import pi
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from GBDT import GBDTRegressor, GBDTBinaryClassifier, GBDTMultiClassifier
@@ -30,15 +25,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-df = pd.read_csv('data/credit.data.csv')
-train = df[:int(df.shape[0] * 0.8)]
-test  = df[int(df.shape[0] * 0.8):]
-target_name = 'label'
-
-# df = pd.read_csv('data/BankNote.csv')
+# df = pd.read_csv('data/credit.data.csv')
 # train = df[:int(df.shape[0] * 0.8)]
 # test  = df[int(df.shape[0] * 0.8):]
-# target_name = 'class'
+# target_name = 'label'
+
+df = pd.read_csv('data/BankNote.csv')
+train = df[:int(df.shape[0] * 0.8)]
+test  = df[int(df.shape[0] * 0.8):]
+target_name = 'class'
 
 # df = pd.read_csv('data/classification.csv')
 
@@ -206,7 +201,7 @@ def pso_run():
     max_tree_depth = 5
 
     pso = PSO(dataset, iterations=iterations, size_population=size_population,  max_tree_nums=max_tree_nums, learning_rate = learning_rate, 
-                                max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.7, alfa=0.7)
+                                max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.5, alfa=0.5)
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.get_gbest().get_pbest(), pso.get_gbest().get_cost_pbest()))
 
