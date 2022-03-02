@@ -1,7 +1,9 @@
+from os import pread
 from Tree import Tree
 import pandas as pd
 import math
 import warnings
+import time
 import numpy as np
 warnings.filterwarnings("ignore")
 
@@ -48,17 +50,14 @@ class BaseGBDT:
 
         # Construct the GBDT
         for i in range(1, self.max_tree_nums + 1):
-            self.residuals.append(self.loss.calculate_residual(data, i))
+            self.loss.calculate_residual(data, i)
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
-            # print(f"tree {i} start")
             tree.build_tree(data)
-            # print(f"tree {i} finish")
             self.trees[i] = tree
-            # print(f"tree {i} update")
-            self.loss.update_f_m(data, self.trees, i, self.learning_rate)
-            # print(f"tree {i} update finish")
-    
+            # self.loss.update_f_m(data, self.trees, i, self.learning_rate)
+            self.residuals.append(self.loss.update_f_m(data, self.trees, i, self.learning_rate))
+
 
     def get_residuals(self):
         """return residuals"""
@@ -116,17 +115,14 @@ class GBDTBinaryClassifier(BaseGBDT):
     def predict(self, data):
         data['f_0'] = self.f_0
         for iter in range(1, self.max_tree_nums + 1):
-            # print("iter {} start".format(iter))
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
-            rules = self.trees[iter].get_rules()
-            data[f_m_name] = data[f_prev_name] + \
-                            self.learning_rate * \
-                            data.apply(lambda x : self.trees[iter].predict_instance(x, rules), axis=1)            
-            # print("finished")
-        data['predict_value'] = data[f_m_name]
-        data['predict_proba'] = data[f_m_name].apply(lambda x: 1 / (1 + np.exp(-x)))
-        data['predict_label'] = data['predict_proba'].apply(lambda x: 1 if x >= 0.5 else 0)
+            leafs = self.trees[iter].predict(data)
+            data[f_m_name] = data[f_prev_name].values + (self.learning_rate * leafs)
+        
+        condlist   = [1 / (1 + np.exp(-data[f_m_name])) >= 0.5] 
+        choicelist = [1]
+        data['predict_label'] = np.select(condlist, choicelist, default = 0)
 
         return data
 

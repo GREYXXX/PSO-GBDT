@@ -147,6 +147,10 @@ class PSO():
     def setGBest(self, new_gbest):
         self.gbest = new_gbest
 
+    # returns gbest (best particle of the population)
+    def get_gbest(self):
+        return self.gbest
+
     def run(self):
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
@@ -160,6 +164,7 @@ class PSO():
 
                 par.clear_velocity() # cleans the speed of the particle
                 temp_velocity = []
+                repeat_solutions = []
                 solution_gbest = self.gbest.get_pbest() # gets solution of the gbest
                 solution_pbest = par.get_pbest()[:] # gets the pbest solution
                 solution_particle = par.get_current_solution()[:] # gets the current solution of the particle
@@ -191,6 +196,12 @@ class PSO():
                         # makes the swap
                         solution_particle[swap_operator[0]] = swap_operator[1]
                 
+                if len(repeat_solutions) == 0 or solution_particle not in repeat_solutions:
+                    repeat_solutions.append(solution_particle)
+                else:
+                    print(f"repeated : {repeat_solutions}")
+                    continue
+                
                 if self.model_type == 'regression':
                     self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
                 elif self.model_type == 'binary_cf':
@@ -215,9 +226,5 @@ class PSO():
                     par.set_cost_pbest(cost_current_solution)
 
             print("\n")
-    
-    # returns gbest (best particle of the population)
-    def get_gbest(self):
-        return self.gbest
     
 		

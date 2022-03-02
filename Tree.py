@@ -1,5 +1,9 @@
+import numpy as np
+from torch import le
+from transformers import data
 from data import DataSet
 import random
+import time
 
 
 class Node(object):
@@ -83,10 +87,12 @@ class Tree(object):
         """
         Get the remain indexs for the left child node
         """
+
         if df[feature].dtype != 'object':
             return df[df[feature] < feature_value].index
         else:
             return df[df[feature] != feature_value].index
+        
     
     def get_right_remain_indexs(self, df, feature, feature_value):
         """
@@ -97,14 +103,13 @@ class Tree(object):
         else:
             return df[df[feature] == feature_value].index
 
+
     def build_tree(self, data):
         queue = [self.root]
-        # print("tree {} start".format(self.tree_id))
         while (len(queue) != 0):         
             current_node = queue.pop(0)
             current_data = data.loc[current_node.remain_indexs]
             self.tree_array.append(current_node) 
-            #print(len(current_data), current_node.depth)
 
             #Internel node
             if current_node.depth < self.max_depth - 1: 
@@ -139,7 +144,6 @@ class Tree(object):
                 current_node.update_predict_value(current_data, self.target_name, label_name)
                 self.leaf_nodes.append(current_node)
         
-        # print("tree {} finished".format(self.tree_id))
 
 
     def predict(self, df):
@@ -149,23 +153,25 @@ class Tree(object):
 
         # Extract the rules
         rules = [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
-        predict_values = []
-        print(rules) 
-        for i in range(len(df)):
-            str = ''
-            for j in rules:              
-                if df[j[0]].dtype != 'object':
-                    if df.loc[i][j[0]] >= j[1]:
-                        str += '1'
-                    else:
-                        str += '0'
-                else: 
-                    if df.loc[i][j[0]] == j[1]:
-                        str += '1'
-                    else:
-                        str += '0'
-            predict_values.append(self.leaf_nodes[int(str, 2)].predict_value)
-        return predict_values
+        # Extract the leaf values
+        leaf_values = np.array([self.leaf_nodes[i].predict_value for i in range(len(self.leaf_nodes))])
+        idxs = np.zeros(len(df)).astype(int)
+        cur_depth = 0
+        for rule in rules:
+            if df[rule[0]].dtype != "object":
+                condlist   = [df[rule[0]] >= rule[1], df[rule[0]] < rule[1]] 
+                choicelist = [2**(len(rules) - cur_depth - 1), 0]
+
+            else:
+                condlist   = [df[rule[0]] == rule[1], df[rule[0]] != rule[1]] 
+                choicelist = [2**(len(rules) - cur_depth - 1), 0]
+            
+            idxs = idxs + np.select(condlist, choicelist)
+            cur_depth += 1 
+        # values = np.array([self.leaf_nodes[i].predict_value for i in idxs])
+    
+        return leaf_values[idxs]
+
 
     def get_rules(self):
         return [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
@@ -176,19 +182,21 @@ class Tree(object):
         """
 
         df = self.data.get_data()
-        str = ''
-        for rule in rules:
-            if df[rule[0]].dtype != 'object':
-                if instance[rule[0]] >= rule[1]:
-                    str += '1'
+        # str = ''
+        idx = 0
+        for i in range(len(rules)):
+            if df[rules[i][0]].dtype != 'object':
+                if instance[rules[i][0]] >= rules[i][1]:
+                    idx += 2**(len(rules) - i - 1)
                 else:
-                    str += '0'
+                    idx += 0
             else:
-                if instance[rule[0]] == rule[1]:
-                    str += '1'
+                if instance[rules[i][0]] == rules[i][1]:
+                    idx += 2**(len(rules) - i - 1)
                 else:
-                    str += '0'
-        return self.leaf_nodes[int(str, 2)].predict_value
+                    idx += 0
+
+        return self.leaf_nodes[idx].predict_value
             
 
     def get_tree_array(self):
