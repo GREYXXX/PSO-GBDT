@@ -57,11 +57,11 @@ target_name = 'class'
 # test  = df[int(df.shape[0] * 0.8):]
 # target_name = 'label'
 
-df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-train = df[:int(df.shape[0] * 0.8)]
-test  = df[int(df.shape[0] * 0.8):]
-target_name = '54'
+# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
+# train = df[:int(df.shape[0] * 0.8)]
+# test  = df[int(df.shape[0] * 0.8):]
+# target_name = '54'
 
 # df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
 # df = df.drop('Unnamed: 0', axis = 1)
