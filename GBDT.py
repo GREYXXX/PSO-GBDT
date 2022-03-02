@@ -1,3 +1,4 @@
+from os import pread
 from Tree import Tree
 import pandas as pd
 import math
@@ -49,13 +50,14 @@ class BaseGBDT:
 
         # Construct the GBDT
         for i in range(1, self.max_tree_nums + 1):
-            self.residuals.append(self.loss.calculate_residual(data, i))
+            self.loss.calculate_residual(data, i)
             target_name = 'res_' + str(i)
             tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
             tree.build_tree(data)
             self.trees[i] = tree
-            self.loss.update_f_m(data, self.trees, i, self.learning_rate)
-    
+            # self.loss.update_f_m(data, self.trees, i, self.learning_rate)
+            self.residuals.append(self.loss.update_f_m(data, self.trees, i, self.learning_rate))
+
 
     def get_residuals(self):
         """return residuals"""

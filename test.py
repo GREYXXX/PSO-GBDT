@@ -20,6 +20,7 @@ from sklearn.metrics import accuracy_score,classification_report
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_svmlight_file
 import matplotlib.pyplot as plt
+import numpy as np
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -31,6 +32,7 @@ warnings.filterwarnings("ignore")
 # target_name = 'label'
 
 df = pd.read_csv('data/BankNote.csv')
+df = df.sample(frac=1).reset_index(drop=True)
 train = df[:int(df.shape[0] * 0.8)]
 test  = df[int(df.shape[0] * 0.8):]
 target_name = 'class'
@@ -44,11 +46,11 @@ target_name = 'class'
 # df['28'] = df['28'].apply(lambda x : 1 if x > 0 else 0)
 
 # df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+# df = df.drop('Unnamed: 0', axis = 1)
 # df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
 # train = df[:int(df.shape[0] * 0.8)]
 # test  = df[int(df.shape[0] * 0.8):]
 # target_name = '54'
-
 
 dataset = DataSet(train, test, target_name, standardize=False)
 print("encode start...")
@@ -105,11 +107,12 @@ def sklearn_train():
 
 def run():
     a = []
-    gbdt = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 4, max_tree_nums= 1, loss = BinomialDeviance())
+    gbdt = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 4, max_tree_nums= 4, loss = BinomialDeviance())
     # gbdt = GBDTRegressor(0.1, 4, 2, SquaresError())
     gbdt.build_gbdt(dataset, [])
     array = gbdt.get_gbdt_array()
     print(array)
+    print(f"residuals are : {gbdt.get_residuals()}")
 
     random.shuffle(array)
     print(gbdt.get_gbdt_array_all())
@@ -121,6 +124,7 @@ def run():
     gbdt_ = GBDTBinaryClassifier(learning_rate= 0.4, max_depth= 4, max_tree_nums= 1, loss = BinomialDeviance())
     gbdt_.build_gbdt(dataset, array)
     print(gbdt_.get_gbdt_array_all())
+    print(f"residuals shuffled are : {gbdt.get_residuals()}")
 
     predict = gbdt_.predict(dataset.get_test_data())
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
@@ -196,14 +200,17 @@ def pso_run():
 
     iterations=10
     size_population=30
-    max_tree_nums=6
-    learning_rate = 0.3
+    max_tree_nums=5
+    learning_rate = 0.4
     max_tree_depth = 5
 
+    start = time.time()
     pso = PSO(dataset, iterations=iterations, size_population=size_population,  max_tree_nums=max_tree_nums, learning_rate = learning_rate, 
-                                max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.5, alfa=0.5)
+                                max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.3, alfa=0.3)
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.get_gbest().get_pbest(), pso.get_gbest().get_cost_pbest()))
+
+    end = time.time()
 
     #Build the gbdt with gbest solution
     gbdt = GBDTBinaryClassifier(learning_rate=learning_rate, max_depth=max_tree_depth, max_tree_nums=max_tree_nums, loss = BinomialDeviance())
@@ -212,6 +219,7 @@ def pso_run():
     predict = gbdt.predict(dataset.get_test_data())
     #print the accuracy
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
+    print(f"time taken is {end - start}")
 
 
 # sklearn_train()

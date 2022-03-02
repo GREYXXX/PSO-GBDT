@@ -60,7 +60,7 @@ class DataSet:
             f = self.columns[random.randint(0, self.columns.size - 1)]
         else:
             f = columns[random.randint(0, columns.size - 1)]
-
+            
         fval =  self.train[f][random.randint(0, self.train.shape[0] - 1)]
         return (f, fval)
 
