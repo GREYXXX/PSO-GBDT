@@ -31,11 +31,11 @@ warnings.filterwarnings("ignore")
 # test  = df[int(df.shape[0] * 0.8):]
 # target_name = 'label'
 
-df = pd.read_csv('data/BankNote.csv')
-df = df.sample(frac=1).reset_index(drop=True)
-train = df[:int(df.shape[0] * 0.8)]
-test  = df[int(df.shape[0] * 0.8):]
-target_name = 'class'
+# df = pd.read_csv('data/BankNote.csv')
+# df = df.sample(frac=1).reset_index(drop=True)
+# train = df[:int(df.shape[0] * 0.8)]
+# test  = df[int(df.shape[0] * 0.8):]
+# target_name = 'class'
 
 # df = pd.read_csv('data/classification.csv')
 
@@ -63,12 +63,12 @@ target_name = 'class'
 # test  = df[int(df.shape[0] * 0.8):]
 # target_name = '54'
 
-# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-# df = df.drop('Unnamed: 0', axis = 1)
-# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-# train = df[:int(df.shape[0] * 0.8)]
-# test  = df[int(df.shape[0] * 0.8):]
-# target_name = '54'
+df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+df = df.drop('Unnamed: 0', axis = 1)
+df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
+train = df[:int(df.shape[0] * 0.8)]
+test  = df[int(df.shape[0] * 0.8):]
+target_name = '54'
 
 dataset = DataSet(train, test, target_name, standardize=False)
 print("encode start...")
