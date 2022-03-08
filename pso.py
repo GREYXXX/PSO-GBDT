@@ -89,12 +89,26 @@ class Particle:
 
 class PSO():
 
-    def __init__(self, dataset, iterations, size_population, max_tree_nums=5, learning_rate = 0.3, max_tree_depth = 4, 
-                    model_type='regression', beta=1, alfa=1):
+    def __init__(
+        self, 
+        dataset, 
+        iterations, 
+        size_population, 
+        pretrain_nodes = [],
+        pretrained = False, 
+        max_tree_nums=5, 
+        learning_rate = 0.3, 
+        max_tree_depth = 4, 
+        model_type='regression', 
+        beta=1, 
+        alfa=1
+    ):
 
         self.dataset = dataset
         self.iterations = iterations
         self.size_population = size_population
+        self.pretrain_nodes = pretrain_nodes
+        self.pretrain = pretrained
         
         #The max tree numbers of GBDT
         self.max_tree_nums = max_tree_nums
@@ -115,13 +129,26 @@ class PSO():
             raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
 
         #Init the particles
-        self.init_swarm()
+        if pretrained or len(pretrain_nodes) > 1:
+            self.init_swarm_with_nodes()
+        else:
+            self.init_swarm()
         
     
     def init_swarm(self):
-        print("Particle initialization start....")
+        print("Train without pretrain, and Particle initialization start....")
         for i in range(self.size_population):
             self.gbdt.build_gbdt(self.dataset, [])
+            solution = self.gbdt.get_gbdt_array()
+            self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            print("particle {} finished".format(i))
+        print("Particle initialization finished")
+
+    def init_swarm_with_nodes(self):
+        print("Train with pretrain, and Particle initialization start....")
+        for i in range(self.size_population):
+            array = random.choices(self.pretrain_nodes, k = self.max_tree_depth * self.max_tree_nums)
+            self.gbdt.build_gbdt(self.dataset, array)
             solution = self.gbdt.get_gbdt_array()
             self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
             print("particle {} finished".format(i))

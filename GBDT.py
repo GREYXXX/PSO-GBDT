@@ -1,7 +1,6 @@
 from os import pread
 from Tree import Tree
 import pandas as pd
-import math
 import warnings
 import time
 import numpy as np
@@ -57,7 +56,7 @@ class BaseGBDT:
             self.trees[i] = tree
             # self.loss.update_f_m(data, self.trees, i, self.learning_rate)
             self.residuals.append(self.loss.update_f_m(data, self.trees, i, self.learning_rate))
-
+        
 
     def get_residuals(self):
         """return residuals"""

@@ -80,6 +80,7 @@ def sklearn_train():
     # X, y = pickle.load(open('/Users/xirao/data/higgs.plk', "rb"))
     # df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
     df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+    df = df.drop('Unnamed: 0', axis = 1)
     # X = df.drop('success', axis=1)
     # y = df['success']
     X = df.drop('54', axis=1)
@@ -105,12 +106,13 @@ def sklearn_train():
         print("Accuracy score (training): {0:.3f}".format(xgbd.score(X_train, y_train)))
         print("Accuracy score (validation): {0:.3f}".format(xgbd.score(X_test, y_test)))
 
+    pickle.dump(xgbd, open("pretrain_models/BankNotes.pkl", "wb"))
     # df = xgbd.get_booster().trees_to_dataframe()
     # print(df)
 
-    dump_list=xgbd.get_booster().get_dump()
-    tree1 = dump_list[0]
-    print(tree1)
+    # dump_list=xgbd.get_booster().get_dump()
+    # tree1 = dump_list[0]
+    # print(tree1)
     # for i in dump_list:
     #     print(i)
 
@@ -131,6 +133,7 @@ def run():
     array = gbdt.get_gbdt_array()
     print(array)
     print(f"residuals are : {gbdt.get_residuals()}")
+    # print(dataset.get_train_data())
 
     random.shuffle(array)
     print(gbdt.get_gbdt_array_all())
@@ -143,6 +146,7 @@ def run():
     gbdt_.build_gbdt(dataset, array)
     print(gbdt_.get_gbdt_array_all())
     print(f"residuals shuffled are : {gbdt.get_residuals()}")
+    # print(dataset.get_train_data())
 
     predict = gbdt_.predict(dataset.get_test_data())
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
@@ -219,19 +223,33 @@ def pso_run():
     iterations=10
     size_population=30
     max_tree_nums=5
-    learning_rate = 0.4
+    learning_rate = 0.2
     max_tree_depth = 5
 
     start = time.time()
-    pso = PSO(dataset, iterations=iterations, size_population=size_population,  max_tree_nums=max_tree_nums, learning_rate = learning_rate, 
-                                max_tree_depth = max_tree_depth, model_type='binary_cf', beta=0.3, alfa=0.3)
+    pso = PSO(
+        dataset, 
+        iterations=iterations, 
+        size_population=size_population,  
+        max_tree_nums=max_tree_nums, 
+        learning_rate = learning_rate, 
+        max_tree_depth = max_tree_depth, 
+        model_type='binary_cf', 
+        beta=0.3, 
+        alfa=0.3
+    )
     pso.run() # runs the PSO algorithm
     print('gbest: %s | cost: %f\n' % (pso.get_gbest().get_pbest(), pso.get_gbest().get_cost_pbest()))
 
     end = time.time()
 
     #Build the gbdt with gbest solution
-    gbdt = GBDTBinaryClassifier(learning_rate=learning_rate, max_depth=max_tree_depth, max_tree_nums=max_tree_nums, loss = BinomialDeviance())
+    gbdt = GBDTBinaryClassifier(
+        learning_rate=learning_rate, 
+        max_depth=max_tree_depth, 
+        max_tree_nums=max_tree_nums, 
+        loss = BinomialDeviance()
+    )
     gbdt.build_gbdt(dataset, pso.get_gbest().get_pbest())
     #Predict the results for test dataset
     predict = gbdt.predict(dataset.get_test_data())
@@ -240,8 +258,8 @@ def pso_run():
     print(f"time taken is {end - start}")
 
 
-# sklearn_train()
-pso_run()
+sklearn_train()
+# pso_run()
 # run()
 # test_predict()
 # test_xgb_predict()

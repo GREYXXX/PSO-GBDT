@@ -33,23 +33,27 @@ class DataSet:
         self.df = pd.concat([self.train, self.test],axis=0,ignore_index=True)
 
 
-    def encode_table(self):
+    def encode_table(self, pretrained = False, pretrain_arrays = []):
         """Make an hash table to bind the (feature, feature value)"""
 
-        #Extract all unique feature values
-        self.unique_values = [(col, list(pd.unique(self.train[col]))) for col in self.train.columns[:self.train.columns.get_loc('label')]]
-        #Endcode the unique feature and feature values by (feature, feature value)
-        self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]]
+        if pretrained:
+            self.merge_values = [i for i in pretrain_arrays]
+        else:
+            #Extract all unique feature values
+            self.unique_values = [(col, list(pd.unique(self.train[col]))) for col in self.train.columns[:self.train.columns.get_loc('label')]]
+            #Endcode the unique feature and feature values by (feature, feature value)
+            self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]]
+        
         self.lookup_tables = {i: self.merge_values[i] for i in range(len(self.merge_values))}
 
     def get_data(self):
-        return self.df
+        return self.df.copy()
 
     def get_train_data(self):
-        return self.train
+        return self.train.copy()
     
     def get_test_data(self):
-        return self.test
+        return self.test.copy()
 
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""
