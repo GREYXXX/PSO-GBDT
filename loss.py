@@ -86,8 +86,8 @@ class BinomialDeviance(LossFunction):
         numerator = targets.sum()
         if numerator == 0:
             return 0.0
-        denominator = ((y - targets) * (1 - y + targets)).sum()
-        if abs(denominator) < 1e-150:
+        denominator = ((y - targets) * (2 - y + targets)).sum()
+        if abs(denominator) < 1e-150: 
             return 0.0
         else:
             return numerator / denominator
