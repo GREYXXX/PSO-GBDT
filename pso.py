@@ -179,19 +179,23 @@ class PSO():
         return self.gbest
 
     def run(self):
+        record_fit = []
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
             self.gbest = max(self.particles, key=attrgetter('pbest_solution_fit'))
             print("gbest is :{} at {} iter".format(self.gbest.get_cost_pbest(), iter))
+            
+            if len(record_fit) != 0:
+                per = record_fit.count(max(set(record_fit), key = record_fit.count)) / len(record_fit)
+                if per > .8:
+                    print(f"early stop trigger")
+                    break
+                    
+                record_fit.clear()
 
             for par in self.particles:
-                #calc fitness for each particle
-                #get local best pbest -- the best fitness value in each particle's memory
-                #get global best gbst -- the best fitness value accorss the whole population
-
                 par.clear_velocity() # cleans the speed of the particle
                 temp_velocity = []
-                repeat_solutions = []
                 solution_gbest = self.gbest.get_pbest() # gets solution of the gbest
                 solution_pbest = par.get_pbest()[:] # gets the pbest solution
                 solution_particle = par.get_current_solution()[:] # gets the current solution of the particle
@@ -223,12 +227,6 @@ class PSO():
                         # makes the swap
                         solution_particle[swap_operator[0]] = swap_operator[1]
                 
-                if len(repeat_solutions) == 0 or solution_particle not in repeat_solutions:
-                    repeat_solutions.append(solution_particle)
-                else:
-                    print(f"repeated : {repeat_solutions}")
-                    continue
-                
                 if self.model_type == 'regression':
                     self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
                 elif self.model_type == 'binary_cf':
@@ -242,7 +240,8 @@ class PSO():
                 par.set_current_solution(solution_particle)
                 self.gbdt.build_gbdt(self.dataset, solution_particle)
                 # gets cost of the current solution
-                cost_current_solution = self.get_fitness(self.gbdt)
+                cost_current_solution = round(self.get_fitness(self.gbdt), 5)
+                record_fit.append(cost_current_solution)
                 # updates the cost of the current solution
                 par.set_cost_current_solution(cost_current_solution)
                 print(solution_particle, cost_current_solution, iter)
