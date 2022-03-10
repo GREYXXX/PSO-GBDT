@@ -1,7 +1,5 @@
-from copyreg import pickle
 import numpy as np
 import pandas as pd
-from pip import main
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 import graphviz
