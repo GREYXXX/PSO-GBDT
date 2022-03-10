@@ -1,4 +1,3 @@
-from os import pread
 from Tree import Tree
 import pandas as pd
 import warnings

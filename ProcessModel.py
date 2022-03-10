@@ -2,7 +2,7 @@ import imp
 import pickle
 import numpy as np
 
-class PreprocessModel:
+class PreprocessXgbModel:
     def __init__(self, file):
         self.model = pickle.load(open(file, "rb"))
         self.n_trees = self.model.n_estimators
@@ -68,3 +68,20 @@ class PreprocessModel:
         feature, merge, child = self.__get_tree_infos(df)
         trees_array = [(feature[i], merge[i], child[i]) for i in range(len(df))]
         return trees_array
+
+
+
+
+class PreprocessSklModel:
+    def __init__(self, file):
+        self.model = pickle.load(open(file, "rb"))
+    
+    def get_internal_splits(self, features_names):
+        splits = []
+        for i in range(self.model.estimators_.shape[0]):
+            feature = self.model.estimators_[i][0].tree_.feature
+            feature_val = self.model.estimators_[i][0].tree_.threshold
+            for j in range(len(feature)):
+                if feature[j] != -2:
+                    splits.append((features_names[feature[j]], feature_val[j]))
+        return splits

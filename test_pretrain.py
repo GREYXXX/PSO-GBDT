@@ -1,3 +1,4 @@
+from copyreg import pickle
 import numpy as np
 import pandas as pd
 from pip import main
@@ -9,23 +10,38 @@ import time
 from data import DataSet
 from GBDT import GBDTBinaryClassifier, GBDTRegressor
 from pso import PSO
+import pickle
 from loss import BinomialDeviance, SquaresError
-from ProcessModel import PreprocessModel
-
-
+from ProcessModel import PreprocessXgbModel, PreprocessSklModel
+import matplotlib.pyplot as plt
+import re
 
 import warnings
 warnings.filterwarnings("ignore")
 
 
-def pso_run(df, pretrain_file, target_name):
+def plot_pso(x, y, name):
+    plt.grid(which='major', axis='y', color='darkgray')
+    plt.grid(which='major', axis='x', color='darkgray')
+    plt.plot(x,y,color='fuchsia', marker='P', linestyle='dashed')
+    plt.xlabel('Number of iteration',size = 15)
+    plt.ylabel('Fitness value',size = 15)
+    plt.title('PSO with pretrain')
+    # plt.show() 
+    plt.savefig(name)
 
+def pso_run(df, pretrain_file, target_name, pretrain_type = 'xgb'):
+    feature_names = df.columns.values
     df = df.sample(frac=1).reset_index(drop=True)
     train = df[:int(df.shape[0] * 0.8)]
     test  = df[int(df.shape[0] * 0.8):]
 
-    model = PreprocessModel(pretrain_file)
-    internal_splits = model.get_internal_splits()
+    if pretrain_type == 'xgb':
+        model = PreprocessXgbModel(pretrain_file)
+        internal_splits = model.get_internal_splits()
+    else:
+        model = PreprocessSklModel(pretrain_file)
+        internal_splits = model.get_internal_splits(feature_names)
 
     dataset = DataSet(train, test, target_name, standardize=False)
     print("encode start...")
@@ -34,11 +50,11 @@ def pso_run(df, pretrain_file, target_name):
     lookup_tables = dataset.get_lookup_table()
 
     pretrain_arrays = [dataset.get_index(val) for val in internal_splits]
-    iterations=10
-    size_population=30
-    max_tree_nums=7
+    iterations =20
+    size_population = 50
+    max_tree_nums = 6
     learning_rate = 1
-    max_tree_depth = 6
+    max_tree_depth = 5
 
     start = time.time()
     pso = PSO(
@@ -73,24 +89,39 @@ def pso_run(df, pretrain_file, target_name):
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
     print(f"time taken is {end - start}")
 
+    y = pso.get_gbest_records()
+    x = np.arange(iterations)
+    # name = 'pso-pre-convat_0.3-p50'
+
+    base = 'pso-pre'
+    name = base + '-' + re.findall(r"/(.*).p",pretrain_file)[0] + '-p' + str(size_population) + '-i' + str(iterations) 
+    print(name)
+
+    pickle.dump((pso.get_gbest().get_pbest()), open('train_models/' + name + '.pkl', "wb"))
+    plot_pso(x, y, 'images/' + name + '.svg')
+
+
+
+
 
 if __name__ == "__main__":
 
     # df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
     # df = df.drop('Unnamed: 0', axis = 1)
     # df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-
-    df = pd.read_csv("data/wine.csv")
-    df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
-    
-    # train_file = 'data/BankNote.csv'
-    # pretrain_file = '/Users/xirao/data/xgb.pkl'
-    # target_name = 'class'
-
     # pretrain_file = 'pretrain_models/covat_0.3.pkl'
     # target_name = '54'
 
-    pretrain_file = 'pretrain_models/wine.pkl'
-    target_name = 'quality'
+    # df = pd.read_csv("data/wine.csv")
+    # df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
+    # target_name = 'quality'
+    # pretrain_file = 'pretrain_models/wine.pkl'
+    
+    df = pd.read_csv('data/BankNote.csv')
+    pretrain_file = 'pretrain_models/BankNotes.pkl'
+    target_name = 'class'
 
-    pso_run(df, pretrain_file, target_name)
+    # pretrain_file = 'pretrain_models/wine_sk.pkl'
+    # target_name = 'quality'
+
+    pso_run(df, pretrain_file, target_name, pretrain_type='xgb')

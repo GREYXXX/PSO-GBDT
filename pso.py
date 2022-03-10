@@ -110,12 +110,12 @@ class PSO():
         self.pretrain_nodes = pretrain_nodes
         self.pretrain = pretrained
         
-        #The max tree numbers of GBDT
         self.max_tree_nums = max_tree_nums
         self.learning_rate = learning_rate
-        self.max_tree_depth = max_tree_depth     #self.data.columns.size
+        self.max_tree_depth = max_tree_depth 
         self.model_type = model_type
         self.particles = []
+        self.gbest_record = []
         self.beta = beta
         self.alfa = alfa
 
@@ -144,6 +144,7 @@ class PSO():
             print("particle {} finished".format(i))
         print("Particle initialization finished")
 
+   
     def init_swarm_with_nodes(self):
         print("Train with pretrain, and Particle initialization start....")
         for i in range(self.size_population):
@@ -174,24 +175,22 @@ class PSO():
     def setGBest(self, new_gbest):
         self.gbest = new_gbest
 
-    # returns gbest (best particle of the population)
-    def get_gbest(self):
-        return self.gbest
-
     def run(self):
-        record_fit = []
+        # record_fit = []
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
             self.gbest = max(self.particles, key=attrgetter('pbest_solution_fit'))
+            self.gbest_record.append(self.gbest.get_cost_pbest())
             print("gbest is :{} at {} iter".format(self.gbest.get_cost_pbest(), iter))
             
-            if len(record_fit) != 0:
-                per = record_fit.count(max(set(record_fit), key = record_fit.count)) / len(record_fit)
-                if per > .8:
-                    print(f"early stop trigger")
-                    break
+            # if len(record_fit) != 0:
+            #     per = record_fit.count(max(set(record_fit), key = record_fit.count)) / len(record_fit)
+            #     print(per)
+            #     if per > .8:
+            #         print(f"early stop trigger")
+            #         break
                     
-                record_fit.clear()
+            #     record_fit.clear()
 
             for par in self.particles:
                 par.clear_velocity() # cleans the speed of the particle
@@ -241,7 +240,7 @@ class PSO():
                 self.gbdt.build_gbdt(self.dataset, solution_particle)
                 # gets cost of the current solution
                 cost_current_solution = round(self.get_fitness(self.gbdt), 5)
-                record_fit.append(cost_current_solution)
+                # record_fit.append(cost_current_solution)
                 # updates the cost of the current solution
                 par.set_cost_current_solution(cost_current_solution)
                 print(solution_particle, cost_current_solution, iter)
@@ -253,4 +252,10 @@ class PSO():
 
             print("\n")
     
+    # returns gbest (best particle of the population)
+    def get_gbest(self):
+        return self.gbest
+    
+    def get_gbest_records(self):
+        return self.gbest_record
 		

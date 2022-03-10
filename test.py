@@ -7,6 +7,7 @@ import random
 from pso import PSO
 import xgboost as xgb
 from xgboost import plot_tree
+from catboost import CatBoostClassifier
 import os
 import pickle
 import time
@@ -30,37 +31,24 @@ warnings.filterwarnings("ignore")
 # target_name = 'label'
 
 # df = pd.read_csv('data/BankNote.csv')
-# df = df.sample(frac=1).reset_index(drop=True)
 # target_name = 'class'
 
 # df = pd.read_csv('data/classification.csv')
 
-df = pd.read_csv('data/wine.csv')
-df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
-target_name = 'quality'
-
-
-# df = pd.read_csv('data/Swarm_Behaviour.csv')
-# target_name = 'success'
+# df = pd.read_csv('data/wine.csv')
+# df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
+# target_name = 'quality'
 
 # df = pd.read_csv("/Users/xirao/data/training_30.csv")
 # df['Label'] = df['Label'].apply(lambda x : 1 if x == 's' else 0)
 # target_name = 'label'
 
-# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-# target_name = '54'
+df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+df = df.drop('Unnamed: 0', axis = 1)
+df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
+target_name = '54'
 
-# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-# df = df.drop('Unnamed: 0', axis = 1)
-# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-# target_name = '54'
-
-# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-# df = df.drop('Unnamed: 0', axis = 1)
-# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-# target_name = '54'
-
+df = df.sample(frac=1).reset_index(drop=True)
 train = df[:int(df.shape[0] * 0.8)]
 test  = df[int(df.shape[0] * 0.8):]
 
@@ -70,22 +58,23 @@ dataset.encode_table()
 print("encode done...")
 lookup_tables = dataset.get_lookup_table()
 
+
 def sklearn_train():
     # X, y = pickle.load(open('/Users/xirao/data/higgs.plk', "rb"))
     # df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
 
-    # df = pd.read_csv('data/BankNote.csv')
-    # X = df.drop('class', axis=1)
-    # y = df['class']
+    df = pd.read_csv('data/BankNote.csv')
+    X = df.drop('class', axis=1)
+    y = df['class']
 
     # df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
     # df = df.drop('Unnamed: 0', axis = 1)
     # X = df.drop('54', axis=1)
     # y = df['54']
 
-    df = pd.read_csv('data/wine.csv')
-    X = df.drop('quality', axis=1)
-    y = df['quality']
+    # df = pd.read_csv('data/wine.csv')
+    # X = df.drop('quality', axis=1)
+    # y = df['quality']
 
     # X = df.drop('success', axis=1)
     # y = df['success']
@@ -96,21 +85,34 @@ def sklearn_train():
     lr_list = [1]
 
     for learning_rate in lr_list:
-        # gb_clf = GradientBoostingClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=5, random_state=0)
-        # gb_clf.fit(X_train, y_train)
+        gb_clf = GradientBoostingClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=4, random_state=0)
+        gb_clf.fit(X_train, y_train)
 
-        # print("Learning rate: ", learning_rate)
-        # print("Accuracy score (training): {0:.3f}".format(gb_clf.score(X_train, y_train)))
-        # print("Accuracy score (validation): {0:.3f}".format(gb_clf.score(X_test, y_test)))
+        print("Learning rate: ", learning_rate)
+        print("SKR Accuracy score (training): {0:.3f}".format(gb_clf.score(X_train, y_train)))
+        print("SKR Accuracy score (validation): {0:.3f}".format(gb_clf.score(X_test, y_test)))
 
-        xgbd = xgb.XGBClassifier(n_estimators=8, learning_rate=learning_rate, max_depth=6)
+        xgbd = xgb.XGBClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=4)
         xgbd.fit(X_train, y_train)
 
         print("Learning rate: ", learning_rate)
-        print("Accuracy score (training): {0:.3f}".format(xgbd.score(X_train, y_train)))
-        print("Accuracy score (validation): {0:.3f}".format(xgbd.score(X_test, y_test)))
+        print("XGB Accuracy score (training): {0:.3f}".format(xgbd.score(X_train, y_train)))
+        print("XGB Accuracy score (validation): {0:.3f}".format(xgbd.score(X_test, y_test)))
 
-    pickle.dump(xgbd, open("pretrain_models/wine.pkl", "wb"))
+        clf = CatBoostClassifier(
+            iterations=6, 
+            depth = 4,
+            learning_rate=1, 
+        )
+        clf.fit(X_train, y_train)
+
+        print("Learning rate: ", learning_rate)
+        print("Cat Accuracy score (training): {0:.3f}".format(clf.score(X_train, y_train)))
+        print("Cat Accuracy score (validation): {0:.3f}".format(clf.score(X_test, y_test)))
+
+
+    # pickle.dump(xgbd, open("pretrain_models/wine.pkl", "wb"))
+    # pickle.dump(gb_clf, open("pretrain_models/wine_sk.pkl", "wb"))
 
     # df = xgbd.get_booster().trees_to_dataframe()
     # print(df)
@@ -151,7 +153,6 @@ def run():
     gbdt_.build_gbdt(dataset, array)
     print(gbdt_.get_gbdt_array_all())
     print(f"residuals shuffled are : {gbdt.get_residuals()}")
-    # print(dataset.get_train_data())
 
     predict = gbdt_.predict(dataset.get_test_data())
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
@@ -222,8 +223,18 @@ def test_xgb_predict():
     print(accs)
 
 
-def pso_run():
-    """dataset, iterations, size_population, max_tree_nums=5, learning_rate = 0.3, max_tree_depth = 4, model_type='regression', beta=1, alfa=1"""
+def plot_pso(x, y, name):
+    plt.grid(which='major', axis='y', color='darkgray')
+    plt.grid(which='major', axis='x', color='darkgray')
+    plt.plot(x,y,color='fuchsia', marker='P', linestyle='dashed')
+    plt.xlabel('Number of iteration',size = 15)
+    plt.ylabel('Fitness value',size = 15)
+    plt.title('PSO with pure search')
+    # plt.show() 
+    plt.savefig(name)
+
+
+def pso_run(name):
 
     iterations=20
     size_population=50
@@ -262,9 +273,19 @@ def pso_run():
     print(sum(predict['label'] == predict['predict_label']) / len(predict))
     print(f"time taken is {end - start}")
 
+    y = pso.get_gbest_records()
+    x = np.arange(iterations)
+
+    base = 'pso-search'
+    name = base + '-' + name + '-p' + str(size_population) + '-i' + str(iterations) 
+    print(name)
+
+    pickle.dump((pso.get_gbest().get_pbest()), open('train_models/' + name + '.pkl', "wb"))
+    plot_pso(x, y, 'images/' + name + '.svg')
+
 
 # sklearn_train()
-pso_run()
+pso_run('covat_0.3')
 # run()
 # test_predict()
 # test_xgb_predict()
