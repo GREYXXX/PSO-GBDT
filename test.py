@@ -30,8 +30,8 @@ warnings.filterwarnings("ignore")
 # df = pd.read_csv('data/credit.data.csv')
 # target_name = 'label'
 
-# df = pd.read_csv('data/BankNote.csv')
-# target_name = 'class'
+df = pd.read_csv('data/BankNote.csv')
+target_name = 'class'
 
 # df = pd.read_csv('data/classification.csv')
 
@@ -43,16 +43,17 @@ warnings.filterwarnings("ignore")
 # df['Label'] = df['Label'].apply(lambda x : 1 if x == 's' else 0)
 # target_name = 'label'
 
-df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
-df = df.drop('Unnamed: 0', axis = 1)
-df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
-target_name = '54'
+# df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
+# df = df.drop('Unnamed: 0', axis = 1)
+# df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
+# target_name = '54'
 
 df = df.sample(frac=1).reset_index(drop=True)
 train = df[:int(df.shape[0] * 0.8)]
 test  = df[int(df.shape[0] * 0.8):]
 
-dataset = DataSet(train, test, target_name, standardize=False)
+is_bin = True
+dataset = DataSet(train, test, target_name, standardize=False, is_bin=is_bin)
 print("encode start...")
 dataset.encode_table()
 print("encode done...")
@@ -63,28 +64,29 @@ def sklearn_train():
     # X, y = pickle.load(open('/Users/xirao/data/higgs.plk', "rb"))
     # df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
 
-    df = pd.read_csv('data/BankNote.csv')
-    X = df.drop('class', axis=1)
-    y = df['class']
+    # df = pd.read_csv('data/BankNote.csv')
+    # X = df.drop('class', axis=1)
+    # y = df['class']
 
     # df = pd.read_csv("/Users/xirao/data/covat_0.3.csv")
     # df = df.drop('Unnamed: 0', axis = 1)
     # X = df.drop('54', axis=1)
     # y = df['54']
 
-    # df = pd.read_csv('data/wine.csv')
-    # X = df.drop('quality', axis=1)
-    # y = df['quality']
+    df = pd.read_csv('data/wine.csv')
+    X = df.drop('quality', axis=1)
+    y = df['quality']
 
     # X = df.drop('success', axis=1)
     # y = df['success']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    learning_rate = 1
     # lr_list = [0.01, 0.075, 0.1, 0.25, 0.5, 0.75, 1]
     # lr_list = [0.1, 0.25, 0.4, 1]
-    lr_list = [1]
+    # lr_list = [1]
 
-    for learning_rate in lr_list:
+    for _ in range(5):
         gb_clf = GradientBoostingClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=4, random_state=0)
         gb_clf.fit(X_train, y_train)
 
@@ -236,11 +238,11 @@ def plot_pso(x, y, name):
 
 def pso_run(name):
 
-    iterations=20
-    size_population=50
-    max_tree_nums=7
+    iterations=10
+    size_population=30
+    max_tree_nums=6
     learning_rate = 1
-    max_tree_depth = 6
+    max_tree_depth = 5
 
     start = time.time()
     pso = PSO(
@@ -277,7 +279,10 @@ def pso_run(name):
     x = np.arange(iterations)
 
     base = 'pso-search'
-    name = base + '-' + name + '-p' + str(size_population) + '-i' + str(iterations) 
+    if is_bin:
+        name = base + '-' + name + '-bins' + '-p' + str(size_population) + '-i' + str(iterations) 
+    else:
+        name = base + '-' + name + '-p' + str(size_population) + '-i' + str(iterations) 
     print(name)
 
     pickle.dump((pso.get_gbest().get_pbest()), open('train_models/' + name + '.pkl', "wb"))
@@ -285,7 +290,7 @@ def pso_run(name):
 
 
 # sklearn_train()
-pso_run('covat_0.3')
+pso_run('bn')
 # run()
 # test_predict()
 # test_xgb_predict()
