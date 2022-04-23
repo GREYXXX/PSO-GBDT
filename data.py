@@ -1,3 +1,4 @@
+from heapq import merge
 import pandas as pd
 import random
 from sklearn.utils import shuffle
@@ -42,7 +43,7 @@ class DataSet:
             self.merge_values = [i for i in pretrain_arrays]
         else:
             if self.is_bin:
-                bins = GetBins(self.train, self.columns, max_bin = 255)
+                bins = GetBins(self.train, self.columns, max_bin = 100)
                 bins = {i : bins[i][1:-1] for i in bins}
                 self.bins = bins
                 self.unique_values = [(col, bins[col]) for col in self.train.columns[:self.train.columns.get_loc('label')]]
@@ -50,8 +51,8 @@ class DataSet:
                 self.unique_values = [(col, list(pd.unique(self.train[col]))) 
                                                 for col in self.train.columns[:self.train.columns.get_loc('label')]]
             
-            self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]]   
-        
+            self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]] 
+
         self.lookup_tables = {i: self.merge_values[i] for i in range(len(self.merge_values))}
 
     def get_data(self):

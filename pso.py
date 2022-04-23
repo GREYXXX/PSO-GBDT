@@ -151,6 +151,7 @@ class PSO():
             array = random.choices(self.pretrain_nodes, k = self.max_tree_depth * self.max_tree_nums)
             self.gbdt.build_gbdt(self.dataset, array)
             solution = self.gbdt.get_gbdt_array()
+            self.get_fitness(self.gbdt)
             self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
@@ -162,7 +163,7 @@ class PSO():
 
         if self.model_type == 'regression':
             #RMSE should be as small as possible, so negate the value make the fitness as big as possible
-            fitness = - ((data['predict_value'] - data['label']) ** 2).mean() ** .5
+            fitness = - ((predict['predict_value'] - predict['label']) ** 2).mean() ** .5
         elif self.model_type == 'binary_cf':
             fitness = sum(predict['label'] == predict['predict_label']) / len(predict)
         elif self.model_type == 'multi_cf':

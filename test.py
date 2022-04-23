@@ -30,14 +30,14 @@ warnings.filterwarnings("ignore")
 # df = pd.read_csv('data/credit.data.csv')
 # target_name = 'label'
 
-df = pd.read_csv('data/BankNote.csv')
-target_name = 'class'
+# df = pd.read_csv('data/BankNote.csv')
+# target_name = 'class'
 
 # df = pd.read_csv('data/classification.csv')
 
-# df = pd.read_csv('data/wine.csv')
-# df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
-# target_name = 'quality'
+df = pd.read_csv('data/wine.csv')
+df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
+target_name = 'quality'
 
 # df = pd.read_csv("/Users/xirao/data/training_30.csv")
 # df['Label'] = df['Label'].apply(lambda x : 1 if x == 's' else 0)
@@ -48,11 +48,17 @@ target_name = 'class'
 # df['54'] = df['54'].apply(lambda x : 1 if x > 1.0 else 0)
 # target_name = '54'
 
+# df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
+# df = df.drop('Unnamed: 0', axis = 1)
+# df['28'] = df['28'].apply(lambda x : int(x))
+# target_name = '28'
+
+
 df = df.sample(frac=1).reset_index(drop=True)
 train = df[:int(df.shape[0] * 0.8)]
 test  = df[int(df.shape[0] * 0.8):]
 
-is_bin = True
+is_bin = False
 dataset = DataSet(train, test, target_name, standardize=False, is_bin=is_bin)
 print("encode start...")
 dataset.encode_table()
@@ -61,8 +67,10 @@ lookup_tables = dataset.get_lookup_table()
 
 
 def sklearn_train():
-    # X, y = pickle.load(open('/Users/xirao/data/higgs.plk', "rb"))
     # df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
+    # df = df.drop('Unnamed: 0', axis = 1)
+    # X = df.drop('28', axis=1)
+    # y = df['28']
 
     # df = pd.read_csv('data/BankNote.csv')
     # X = df.drop('class', axis=1)
@@ -79,38 +87,45 @@ def sklearn_train():
 
     # X = df.drop('success', axis=1)
     # y = df['success']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-    learning_rate = 1
     # lr_list = [0.01, 0.075, 0.1, 0.25, 0.5, 0.75, 1]
     # lr_list = [0.1, 0.25, 0.4, 1]
     # lr_list = [1]
 
-    for _ in range(5):
-        gb_clf = GradientBoostingClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=4, random_state=0)
+    learning_rate = 1
+    gb  = []
+    xb = []
+    cat = [] 
+    dt  = []
+
+    for _ in range(10):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        gb_clf = GradientBoostingClassifier(n_estimators=5, learning_rate=learning_rate, max_depth=4, random_state=0)
         gb_clf.fit(X_train, y_train)
+        gb.append(gb_clf.score(X_test, y_test))
 
-        print("Learning rate: ", learning_rate)
-        print("SKR Accuracy score (training): {0:.3f}".format(gb_clf.score(X_train, y_train)))
-        print("SKR Accuracy score (validation): {0:.3f}".format(gb_clf.score(X_test, y_test)))
+        # print("Learning rate: ", learning_rate)
+        # print("SKR Accuracy score (training): {0:.3f}".format(gb_clf.score(X_train, y_train)))
+        # print("SKR Accuracy score (validation): {0:.3f}".format(gb_clf.score(X_test, y_test)))
 
-        xgbd = xgb.XGBClassifier(n_estimators=6, learning_rate=learning_rate, max_depth=4)
+        xgbd = xgb.XGBClassifier(n_estimators=5, learning_rate=learning_rate, max_depth=4)
         xgbd.fit(X_train, y_train)
+        xb.append(xgbd.score(X_test, y_test))
 
-        print("Learning rate: ", learning_rate)
-        print("XGB Accuracy score (training): {0:.3f}".format(xgbd.score(X_train, y_train)))
-        print("XGB Accuracy score (validation): {0:.3f}".format(xgbd.score(X_test, y_test)))
+        # print("Learning rate: ", learning_rate)
+        # print("XGB Accuracy score (training): {0:.3f}".format(xgbd.score(X_train, y_train)))
+        # print("XGB Accuracy score (validation): {0:.3f}".format(xgbd.score(X_test, y_test)))
 
         clf = CatBoostClassifier(
-            iterations=6, 
+            iterations=5, 
             depth = 4,
             learning_rate=1, 
         )
         clf.fit(X_train, y_train)
+        cat.append(clf.score(X_test, y_test))
 
-        print("Learning rate: ", learning_rate)
-        print("Cat Accuracy score (training): {0:.3f}".format(clf.score(X_train, y_train)))
-        print("Cat Accuracy score (validation): {0:.3f}".format(clf.score(X_test, y_test)))
+        # print("Learning rate: ", learning_rate)
+        # print("Cat Accuracy score (training): {0:.3f}".format(clf.score(X_train, y_train)))
+        # print("Cat Accuracy score (validation): {0:.3f}".format(clf.score(X_test, y_test)))
 
 
     # pickle.dump(xgbd, open("pretrain_models/wine.pkl", "wb"))
@@ -125,14 +140,20 @@ def sklearn_train():
     # for i in dump_list:
     #     print(i)
 
-    decisionTreeModel = DecisionTreeClassifier(criterion= 'entropy',
-                                           max_depth = 7, 
-                                           splitter='best', 
-                                           random_state=10)
+        decisionTreeModel = DecisionTreeClassifier(criterion= 'entropy',
+                                            max_depth = 7, 
+                                            splitter='best', 
+                                            random_state=10)
 
-    decisionTreeModel.fit(X_train,y_train)
-    print(' Train Score is   : ' ,decisionTreeModel.score(X_train, y_train))
-    print(' Test Score is    : ' ,decisionTreeModel.score(X_test, y_test))
+        decisionTreeModel.fit(X_train,y_train)
+        dt.append(decisionTreeModel.score(X_test, y_test))
+        # print(' Train Score is   : ' ,decisionTreeModel.score(X_train, y_train))
+        # print(' Test Score is    : ' ,decisionTreeModel.score(X_test, y_test))
+  
+    print("Accuracy: %0.2f (+/- %0.2f)" % (np.mean(gb), np.std(gb) * 2))
+    print("Accuracy: %0.2f (+/- %0.2f)" % (np.mean(xb), np.std(xb) * 2))
+    print("Accuracy: %0.2f (+/- %0.2f)" % (np.mean(cat), np.std(cat) * 2))
+    print("Accuracy: %0.2f (+/- %0.2f)" % (np.mean(dt), np.std(dt) * 2))
 
 def run():
     a = []
@@ -238,8 +259,8 @@ def plot_pso(x, y, name):
 
 def pso_run(name):
 
-    iterations=10
-    size_population=30
+    iterations=20
+    size_population=50
     max_tree_nums=6
     learning_rate = 1
     max_tree_depth = 5
@@ -290,7 +311,7 @@ def pso_run(name):
 
 
 # sklearn_train()
-pso_run('bn')
+# pso_run('wine')
 # run()
 # test_predict()
 # test_xgb_predict()

@@ -4,7 +4,7 @@ These are the helper functions for findings the bins for the datasets features, 
 
 def GreedyFindBin(distinct_values, counts,num_distinct_values, max_bin, total_cnt, min_data_in_bin=3):
     bin_upper_bound=[]
-    assert(max_bin>0)
+    assert(max_bin>0)       # Avoid the fist bin is 0
     
     if num_distinct_values <= max_bin:
         cur_cnt_inbin = 0
@@ -131,7 +131,7 @@ def GetBins(df,col_names, max_bin, min_data_in_bin=3):
     for col in col_names:
         tmp=df[col].to_list()
         tmp.sort()
-        distinct_values, counts=_count(tmp)
+        distinct_values, counts = _count(tmp)
         num_distinct_values=len(distinct_values)
         total_cnt=sum(counts)
         bins[col]=FindBinWithZeroAsOneBin(distinct_values, counts, num_distinct_values, max_bin, total_cnt, min_data_in_bin=min_data_in_bin)

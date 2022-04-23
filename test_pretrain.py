@@ -48,8 +48,8 @@ def pso_run(df, pretrain_file, target_name, pretrain_type = 'xgb'):
     lookup_tables = dataset.get_lookup_table()
 
     pretrain_arrays = [dataset.get_index(val) for val in internal_splits]
-    iterations =20
-    size_population = 50
+    iterations =10
+    size_population = 30
     max_tree_nums = 6
     learning_rate = 1
     max_tree_depth = 5
@@ -115,9 +115,15 @@ if __name__ == "__main__":
     # target_name = 'quality'
     # pretrain_file = 'pretrain_models/wine.pkl'
     
-    df = pd.read_csv('data/BankNote.csv')
-    pretrain_file = 'pretrain_models/BankNotes.pkl'
-    target_name = 'class'
+    # df = pd.read_csv('data/BankNote.csv')
+    # pretrain_file = 'pretrain_models/BankNotes.pkl'
+    # target_name = 'class'
+
+    df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
+    df = df.drop('Unnamed: 0', axis = 1)
+    df['28'] = df['28'].apply(lambda x : int(x))
+    target_name = '28'
+    pretrain_file = "pretrain_models/higgs.pkl"
 
     # pretrain_file = 'pretrain_models/wine_sk.pkl'
     # target_name = 'quality'
