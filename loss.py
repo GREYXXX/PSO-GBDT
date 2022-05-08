@@ -108,6 +108,7 @@ class MultinomialDeviance:
         return f_0
 
     def calculate_residual(self, data, iter):
+        
         # calculate negative gradient
         data['sum_exp'] = data.apply(lambda x:
                                      sum([np.exp(x['f_' + i + '_' + str(iter - 1)]) for i in self.classes]),

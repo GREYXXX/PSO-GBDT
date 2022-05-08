@@ -66,6 +66,7 @@ class DataSet:
 
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""
+
         if self.is_bin:
             columns = [i for i in self.bins if len(self.bins[i]) > 0]
             f = columns[random.randint(0, len(columns) - 1)]
@@ -75,9 +76,9 @@ class DataSet:
         else:
             columns = self.columns
             columns = columns.drop(drops)
-            if columns.size == 0:
+            if columns.size == 0:  
                 #This is the case if max_depth > Num of features, the columns will be 0 after .drop() 
-                f = self.columns[random.randint(0, self.columns.size - 1)]
+                f = self.columns[random.randint(0, self.columns.size - 1)]        
             else:
                 f = columns[random.randint(0, columns.size - 1)]
 
@@ -89,11 +90,11 @@ class DataSet:
 
         # randomly pick up a feature
         f = self.columns[random.randint(0, self.columns.size - 1)]
+
         # randomly pick up a feature value belongs to the feature
         fval =  self.train[f][random.randint(0, self.train.shape[0] - 1)]
         
         return (f, fval)
-        #return self.merge_values[random.randint(0,len(self.merge_values) - 1)]
 
     def get_index(self, value):
         """Map the (feature, feature value) to a key value"""

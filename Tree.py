@@ -148,7 +148,6 @@ class Tree(object):
         """
 
         df = self.data.get_data()
-        # str = ''
         idx = 0
         for i in range(len(rules)):
             if df[rules[i][0]].dtype != 'object':
@@ -172,6 +171,7 @@ class Tree(object):
 
         # Extract the rules
         rules = [self.tree_array[2**i].merge for i in range(self.max_depth - 1)]
+
         # Extract the leaf values
         leaf_values = np.array([self.leaf_nodes[i].predict_value for i in range(len(self.leaf_nodes))])
         idxs = np.zeros(len(df)).astype(int)
@@ -187,7 +187,6 @@ class Tree(object):
             
             idxs = idxs + np.select(condlist, choicelist)
             cur_depth += 1 
-        # values = np.array([self.leaf_nodes[i].predict_value for i in idxs])
     
         return leaf_values[idxs]
 

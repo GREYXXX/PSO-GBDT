@@ -97,11 +97,6 @@ class GBDTRegressor(BaseGBDT):
         for iter in range(1, self.max_tree_nums + 1):
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
-            # rules = self.trees[iter].get_rules()
-            # data[f_m_name] = data[f_prev_name] + \
-            #                 self.learning_rate * \
-            #                 data.apply(lambda x : self.trees[iter].predict_instance(x, rules), axis=1)
-
             leafs = self.trees[iter].predict(data)
             data[f_m_name] = data[f_prev_name].values + (self.learning_rate * leafs)
 
@@ -121,7 +116,8 @@ class GBDTBinaryClassifier(BaseGBDT):
             f_m_name = 'f_' + str(iter)
             leafs = self.trees[iter].predict(data)
             data[f_m_name] = data[f_prev_name].values + (self.learning_rate * leafs)
-        
+
+        #apply sigmoid function
         condlist   = [1 / (1 + np.exp(-data[f_m_name])) >= 0.5] 
         choicelist = [1]
         data['predict_label'] = np.select(condlist, choicelist, default = 0)
@@ -176,7 +172,7 @@ class GBDTMultiClassifier(BaseGBDT):
             proba_name = 'predict_proba_' + class_name
             f_m_name = 'f_' + class_name + '_' + str(iter)
             data[proba_name] = data.apply(lambda x: np.exp(x[f_m_name]) / x['sum_exp'], axis=1)
-        # TODO: log the prob of each class
+            
         data['predict_label'] = data.apply(lambda x: self._get_multi_label(x), axis=1)
 
 
