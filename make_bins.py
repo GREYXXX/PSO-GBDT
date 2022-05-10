@@ -2,7 +2,13 @@
 These are the helper functions for findings the bins for the datasets features, aim to reduce the search space for the pso training
 """
 
-def GreedyFindBin(distinct_values, counts,num_distinct_values, max_bin, total_cnt, min_data_in_bin=3):
+def GreedyFindBin(
+    distinct_values, 
+    counts,num_distinct_values, 
+    max_bin, total_cnt, 
+    min_data_in_bin=3
+    ):
+
     bin_upper_bound=[]
     assert(max_bin>0)       # Avoid the fist bin is 0
     
@@ -15,6 +21,7 @@ def GreedyFindBin(distinct_values, counts,num_distinct_values, max_bin, total_cn
                 cur_cnt_inbin = 0
         cur_cnt_inbin += counts[num_distinct_values - 1]
         bin_upper_bound.append(float('Inf'))
+        
     else:
         if min_data_in_bin>0:
             max_bin=min(max_bin,total_cnt//min_data_in_bin)
@@ -63,7 +70,15 @@ def GreedyFindBin(distinct_values, counts,num_distinct_values, max_bin, total_cn
     return bin_upper_bound
 
 
-def FindBinWithZeroAsOneBin(distinct_values, counts,num_distinct_values, max_bin, total_cnt, min_data_in_bin=3):
+def FindBinWithZeroAsOneBin(
+    distinct_values, 
+    counts,
+    num_distinct_values, 
+    max_bin, 
+    total_cnt, 
+    min_data_in_bin=3
+    ):
+
     bin_upper_bound=list()
     assert(max_bin>0)
 
@@ -87,10 +102,17 @@ def FindBinWithZeroAsOneBin(distinct_values, counts,num_distinct_values, max_bin
     
     if left_cnt < 0:
         left_cnt = num_distinct_values
+
     if left_cnt > 0:
         left_max_bin = int( left_cnt_data/ (total_cnt - cnt_zero) * (max_bin - 1) )
         left_max_bin = max(1, left_max_bin)
-        bin_upper_bound = GreedyFindBin(distinct_values, counts, left_cnt, left_max_bin, left_cnt_data, min_data_in_bin)
+        bin_upper_bound = GreedyFindBin(
+            distinct_values, 
+            counts, left_cnt, 
+            left_max_bin, 
+            left_cnt_data, 
+            min_data_in_bin
+            )
         bin_upper_bound[-1] = -kZeroThreshold
 
     right_start = -1
@@ -102,8 +124,14 @@ def FindBinWithZeroAsOneBin(distinct_values, counts,num_distinct_values, max_bin
     if right_start >= 0:
         right_max_bin = max_bin - 1 - len(bin_upper_bound)
         assert(right_max_bin>0)
-        right_bounds = GreedyFindBin(distinct_values[right_start:], counts[right_start:],
-        num_distinct_values - right_start, right_max_bin, right_cnt_data, min_data_in_bin)
+        right_bounds = GreedyFindBin(
+            distinct_values[right_start:], 
+            counts[right_start:],
+            num_distinct_values - right_start, 
+            right_max_bin, 
+            right_cnt_data, 
+            min_data_in_bin
+            )
         bin_upper_bound.append(kZeroThreshold)
         bin_upper_bound+=right_bounds
     else:
@@ -124,8 +152,10 @@ def GetBins(df,col_names, max_bin, min_data_in_bin=3):
             else:
                 distinct_values.append(arr[i])
                 counts_dict[arr[i]]=1
+
         for x in distinct_values:
             counts.append(counts_dict[x])
+
         return distinct_values, counts
         
     for col in col_names:
@@ -134,6 +164,12 @@ def GetBins(df,col_names, max_bin, min_data_in_bin=3):
         distinct_values, counts = _count(tmp)
         num_distinct_values=len(distinct_values)
         total_cnt=sum(counts)
-        bins[col]=FindBinWithZeroAsOneBin(distinct_values, counts, num_distinct_values, max_bin, total_cnt, min_data_in_bin=min_data_in_bin)
+        bins[col]=FindBinWithZeroAsOneBin(
+            distinct_values, 
+            counts, 
+            num_distinct_values, 
+            max_bin, total_cnt, 
+            min_data_in_bin=min_data_in_bin
+            )
 
     return bins

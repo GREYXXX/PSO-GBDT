@@ -2,7 +2,14 @@ import numpy as np
 
 class Node(object):
 
-    def __init__(self, merge, remain_indexs, id, loss, depth, parent):
+    def __init__(
+        self, 
+        merge, 
+        remain_indexs, 
+        id, 
+        loss, 
+        depth, 
+        parent):
 
         """
         param merge: tuple of (feature, feature value)
@@ -38,7 +45,15 @@ class Node(object):
 
 class Tree(object):
 
-    def __init__(self, dataset, target_name, loss, tree_input, max_depth, tree_id):
+    def __init__(
+        self, 
+        dataset, 
+        target_name, 
+        loss, 
+        tree_input, 
+        max_depth, 
+        tree_id
+        ):
 
         """
         param dataset : dataset -->(class DataSet)
@@ -121,11 +136,25 @@ class Tree(object):
                 right_index = self.get_right_remain_indexs(current_data, feature, feature_value)
                 self.id += 1
                 if current_node.left == None:
-                    current_node.left = Node(merge, left_index, self.id, self.loss, current_node.depth + 1, current_node)
+                    current_node.left = Node(
+                        merge, 
+                        left_index, 
+                        self.id, 
+                        self.loss, 
+                        current_node.depth + 1, 
+                        current_node
+                        )
                     queue.append(current_node.left)
 
                 if current_node.right == None:
-                    current_node.right= Node(merge, right_index, self.id, self.loss, current_node.depth + 1, current_node)
+                    current_node.right= Node(
+                        merge, 
+                        right_index, 
+                        self.id, 
+                        self.loss, 
+                        current_node.depth + 1, 
+                        current_node
+                        )
                     queue.append(current_node.right)
             
             #leaf node

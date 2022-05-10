@@ -8,7 +8,13 @@ warnings.filterwarnings("ignore")
 
 class BaseGBDT:
 
-    def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
+    def __init__(
+        self, 
+        learning_rate, 
+        max_depth, 
+        max_tree_nums, 
+        loss
+        ):
 
         """
         param learning_rate: learning rate
@@ -50,7 +56,14 @@ class BaseGBDT:
         for i in range(1, self.max_tree_nums + 1):
             self.loss.calculate_residual(data, i)
             target_name = 'res_' + str(i)
-            tree = Tree(dataset, target_name, self.loss, cut_tree_array[i-1], max_depth = self.max_depth, tree_id = i)
+            tree = Tree(
+                dataset, 
+                target_name, 
+                self.loss, 
+                cut_tree_array[i-1], 
+                max_depth = self.max_depth, 
+                tree_id = i
+            )
             tree.build_tree(data)
             self.trees[i] = tree
             # self.loss.update_f_m(data, self.trees, i, self.learning_rate)
@@ -89,7 +102,14 @@ class BaseGBDT:
 
 class GBDTRegressor(BaseGBDT):
 
-    def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
+    def __init__(
+        self, 
+        learning_rate, 
+        max_depth, 
+        max_tree_nums, 
+        loss
+        ):
+
         super().__init__(learning_rate, max_depth, max_tree_nums, loss)
 
     def predict(self, data):
@@ -106,7 +126,14 @@ class GBDTRegressor(BaseGBDT):
 
 class GBDTBinaryClassifier(BaseGBDT):
 
-    def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
+    def __init__(
+        self, 
+        learning_rate, 
+        max_depth, 
+        max_tree_nums, 
+        loss
+        ):
+
         super().__init__(learning_rate, max_depth, max_tree_nums, loss)
 
     def predict(self, data):
@@ -117,7 +144,7 @@ class GBDTBinaryClassifier(BaseGBDT):
             leafs = self.trees[iter].predict(data)
             data[f_m_name] = data[f_prev_name].values + (self.learning_rate * leafs)
 
-        #apply sigmoid function
+        #Apply sigmoid function
         condlist   = [1 / (1 + np.exp(-data[f_m_name])) >= 0.5] 
         choicelist = [1]
         data['predict_label'] = np.select(condlist, choicelist, default = 0)
@@ -127,7 +154,14 @@ class GBDTBinaryClassifier(BaseGBDT):
 
 class GBDTMultiClassifier(BaseGBDT):
 
-    def __init__(self, learning_rate, max_depth, max_tree_nums, loss):
+    def __init__(
+        self, 
+        learning_rate, 
+        max_depth, 
+        max_tree_nums, 
+        loss
+        ):
+
         super().__init__(learning_rate, max_depth, max_tree_nums, loss)
 
     def build_gbdt(self, data):
@@ -172,7 +206,7 @@ class GBDTMultiClassifier(BaseGBDT):
             proba_name = 'predict_proba_' + class_name
             f_m_name = 'f_' + class_name + '_' + str(iter)
             data[proba_name] = data.apply(lambda x: np.exp(x[f_m_name]) / x['sum_exp'], axis=1)
-            
+
         data['predict_label'] = data.apply(lambda x: self._get_multi_label(x), axis=1)
 
 

@@ -120,11 +120,28 @@ class PSO():
         self.alfa = alfa
 
         if self.model_type == 'regression':
-            self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
+            self.gbdt = GBDTRegressor(
+                self.learning_rate, 
+                self.max_tree_depth, 
+                self.max_tree_nums, 
+                SquaresError()
+                )
+
         elif self.model_type == 'binary_cf':
-            self.gbdt = GBDTBinaryClassifier(self.learning_rate, self.max_tree_depth, self.max_tree_nums, BinomialDeviance())
+            self.gbdt = GBDTBinaryClassifier(
+                self.learning_rate, 
+                self.max_tree_depth, 
+                self.max_tree_nums, 
+                BinomialDeviance()
+                )
+                
         elif self.model_type == 'multi_cf':
-            self.gbdt = GBDTMultiClassifier(self.learning_rate, self.max_tree_depth, self.max_tree_nums, MultinomialDeviance())
+            self.gbdt = GBDTMultiClassifier(
+                self.learning_rate, 
+                self.max_tree_depth, 
+                self.max_tree_nums, 
+                MultinomialDeviance()
+                )
         else:
             raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
 
@@ -148,7 +165,10 @@ class PSO():
     def init_swarm_with_nodes(self):
         print("Train with pretrain, and Particle initialization start....")
         for i in range(self.size_population):
-            array = random.choices(self.pretrain_nodes, k = self.max_tree_depth * self.max_tree_nums)
+            array = random.choices(
+                self.pretrain_nodes, 
+                k = self.max_tree_depth * self.max_tree_nums
+                )
             self.gbdt.build_gbdt(self.dataset, array)
             solution = self.gbdt.get_gbdt_array()
             self.get_fitness(self.gbdt)
@@ -228,11 +248,28 @@ class PSO():
                         solution_particle[swap_operator[0]] = swap_operator[1]
                 
                 if self.model_type == 'regression':
-                    self.gbdt = GBDTRegressor(self.learning_rate, self.max_tree_depth, self.max_tree_nums, SquaresError())
+                    self.gbdt = GBDTRegressor(
+                        self.learning_rate, 
+                        self.max_tree_depth, 
+                        self.max_tree_nums, 
+                        SquaresError()
+                        )
+
                 elif self.model_type == 'binary_cf':
-                    self.gbdt = GBDTBinaryClassifier(self.learning_rate, self.max_tree_depth, self.max_tree_nums, BinomialDeviance())
+                    self.gbdt = GBDTBinaryClassifier(
+                        self.learning_rate, 
+                        self.max_tree_depth, 
+                        self.max_tree_nums, 
+                        BinomialDeviance()
+                        )
+
                 elif self.model_type == 'multi_cf':
-                    self.gbdt = GBDTMultiClassifier(self.learning_rate, self.max_tree_depth, self.max_tree_nums, MultinomialDeviance())
+                    self.gbdt = GBDTMultiClassifier(
+                        self.learning_rate, 
+                        self.max_tree_depth, 
+                        self.max_tree_nums, 
+                        MultinomialDeviance()
+                        )
                 else:
                     raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
 
