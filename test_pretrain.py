@@ -1,3 +1,6 @@
+# @Author XI RAO
+# CITS4001 Research Project
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -110,20 +113,20 @@ if __name__ == "__main__":
     # pretrain_file = 'pretrain_models/covat_0.3.pkl'
     # target_name = '54'
 
-    # df = pd.read_csv("data/wine.csv")
-    # df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
-    # target_name = 'quality'
-    # pretrain_file = 'pretrain_models/wine.pkl'
+    df = pd.read_csv("data/wine.csv")
+    df['quality'] = df['quality'].apply(lambda x : 0 if x == "bad" else 1)
+    target_name = 'quality'
+    pretrain_file = 'pretrain_models/wine.pkl'
     
     # df = pd.read_csv('data/BankNote.csv')
     # pretrain_file = 'pretrain_models/BankNotes.pkl'
     # target_name = 'class'
 
-    df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
-    df = df.drop('Unnamed: 0', axis = 1)
-    df['28'] = df['28'].apply(lambda x : int(x))
-    target_name = '28'
-    pretrain_file = "pretrain_models/higgs.pkl"
+    # df = pd.read_csv("/Users/xirao/data/higgs_0.005.csv")
+    # df = df.drop('Unnamed: 0', axis = 1)
+    # df['28'] = df['28'].apply(lambda x : int(x))
+    # target_name = '28'
+    # pretrain_file = "pretrain_models/higgs.pkl"
 
     # pretrain_file = 'pretrain_models/wine_sk.pkl'
     # target_name = 'quality'

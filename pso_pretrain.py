@@ -1,3 +1,8 @@
+# @Author XI RAO
+# CITS4001 Research Project
+# This file is trying to incorporate the idea of using continous pso with pre-trained results of XGBoost.
+# However, this method has not been fully implemeted due to the time. 
+
 
 import numpy as np
 import pandas as pd
@@ -12,6 +17,7 @@ import graphviz
 from sklearn.tree import export_graphviz
 from operator import attrgetter
 from ProcessModel import PreprocessModel
+from pso import Particle
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -192,68 +198,6 @@ class GBDTInference:
 
         return predict_label
 
-
-
-class Particle:
-
-    def __init__(self, solution, fitness, id):
-        self.solution = solution
-        self.pbest = solution
-        self.id = id
-
-        self.current_solution_fit = fitness
-        self.pbest_solution_fit = fitness
-
-        self.velocity = []
-
-
-    def set_pbest(self, new_pbest):
-        """set pbest"""
-        self.pbest =  new_pbest
-    
-    def get_pbest(self):
-        """returns the pbest """
-        return self.pbest
-
-    def set_velocity(self, new_velocity):
-         """set the new velocity (sequence of swap operators)"""
-         self.velocity = new_velocity
-
-    def get_velocity(self):
-        """returns the velocity (sequence of swap operators)"""
-        return self.velocity
-    
-    def set_current_solution(self, solution):
-        """set current solution"""
-        self.solution = solution
-
-    def get_current_solution(self):
-        """get current solution"""
-        return self.solution
-
-    def set_cost_pbest(self, fitness):
-        """set fitness value for pbest solution"""
-        self.pbest_solution_fit = fitness
-
-    def get_cost_pbest(self):
-        """gets fitness value of pbest solution"""
-        return self.pbest_solution_fit
-
-    def set_cost_current_solution(self, fitness):
-        """set fitness value for the current solution"""
-        self.current_solution_fit = fitness
-
-    def get_cost_current_solution(self):
-        """gets fitness value of the current solution"""
-        return self.current_solution_fit
-
-    def get_particle_id(self):
-        """get particle's id"""
-        return self.id
-
-    def clear_velocity(self):
-        """removes all elements of the list velocity"""
-        del self.velocity[:]
 
 
 class PSO():

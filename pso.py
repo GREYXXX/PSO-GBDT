@@ -8,10 +8,6 @@ from data import DataSet
 from operator import attrgetter
 
 
-"""
-@author XI RAO
-CITS4001 Research Project
-"""
 
 class Particle:
 
@@ -87,7 +83,7 @@ class Particle:
 
 
 
-class PSO():
+class PSO:
 
     def __init__(
         self, 

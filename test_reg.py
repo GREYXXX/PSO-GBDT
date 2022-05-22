@@ -1,3 +1,6 @@
+# @Author XI RAO
+# CITS4001 Research Project
+
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from GBDT import GBDTRegressor, GBDTBinaryClassifier, GBDTMultiClassifier

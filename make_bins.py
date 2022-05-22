@@ -1,6 +1,8 @@
-"""
-These are the helper functions for findings the bins for the datasets features, aim to reduce the search space for the pso training
-"""
+# @Author XI RAO
+# CITS4001 Research Project
+# These are the helper functions for findings the bins for the datasets features, aim to reduce the search space for the pso training
+# This feature discretisation method is originally applied in LightGBM.
+
 
 def GreedyFindBin(
     distinct_values, 

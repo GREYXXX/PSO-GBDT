@@ -1,3 +1,6 @@
+# @Author XI RAO
+# CITS4001 Research Project
+
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from GBDT import GBDTRegressor, GBDTBinaryClassifier, GBDTMultiClassifier
@@ -311,7 +314,7 @@ def pso_run(name):
 
 
 # sklearn_train()
-# pso_run('wine')
+pso_run('wine')
 # run()
 # test_predict()
 # test_xgb_predict()
