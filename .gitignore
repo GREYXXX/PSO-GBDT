@@ -1,0 +1,6 @@
+pretrain_models/*
+images/*
+train_models/*
+
+.DS_Store
+__pycache__
