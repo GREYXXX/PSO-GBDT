@@ -1,3 +1,6 @@
+# @Author XI RAO
+# CITS4001 Research Project
+
 import pickle
 import numpy as np
 

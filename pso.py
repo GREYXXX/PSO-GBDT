@@ -1,3 +1,6 @@
+# @Author XI RAO
+# CITS4001 Research Project
+
 import random
 import re
 import numpy as np
