@@ -4,3 +4,4 @@ train_models/*
 
 .DS_Store
 __pycache__
+catboost_info/*
