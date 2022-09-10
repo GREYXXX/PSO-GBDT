@@ -1,5 +1,8 @@
 
 from ast import arg, main
+import imp
+from turtle import st
+from typing import Tuple
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from GBDT import GBDTRegressor, GBDTBinaryClassifier, GBDTMultiClassifier
@@ -10,9 +13,12 @@ from pso import PSO
 import xgboost as xgb
 from xgboost import plot_tree
 from catboost import CatBoostClassifier
+from ProcessModel import PreprocessXgbModel, PreprocessSklModel
 import os
 import pickle
 import time
+from typing import Tuple
+import zipfile
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
@@ -26,15 +32,15 @@ import argparse
 import warnings
 warnings.filterwarnings("ignore")
 
-# iterations = 20, 
-#     size_population = 50, 
-#     max_tree_nums=6, 
-#     learning_rate = 1, 
-#     max_tree_depth = 5, 
-#     model_type = 'binary_cf',
-#     alpha = 0.45,
-#     beta = 0.45,
-#     is_bin = False
+def get_feature_and_tartgets(
+    filename : str
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+
+    EXIST_FILE_NAMES = ['BankNote.csv', 'classification.csv', 'insurance.csv', 'wine.csv', 'winequality-red.csv']
+    if filename in EXIST_FILE_NAMES:
+        with zipfile.ZipFile(filename) as zf:
+            df = pd.read_csv(zf.open('higgs_0.005.csv'))
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset-path', type=str, default=os.getenv('DATASET_PATH', 'data/BankNote.csv'))
@@ -44,14 +50,48 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type=int, default=os.getenv('LEARNING_RATE', 1))
     parser.add_argument('--max_tree_nums', type=int, default=os.getenv('MAX_TREE_NUM', 6))
     parser.add_argument('--max_tree_depth', type=int, default=os.getenv('MAX_TREE_DEPTH', 5))
-    parser.add_argument('--use-bin', type=bool, default=os.getenv('IF_USE_BIN', False))
+    parser.add_argument('--num_bins', type=int, default=os.getenv('NUM_OF_BINS', -1))
+    parser.add_argument('--pretrain_file', type=str, default=os.getenv('PRETRAIN_FILE', ''))
 
     # parser.add_argument('--alpha', type=float, default=os.getenv('ALPHA_FOR_PSO', 0.45))
     # parser.add_argument('--beta', type=float, default=os.getenv('BETA_FOR_PSO', 0.45))
 
     args, _ = parser.parse_known_args()
 
-    print(args.model_dir, args.learning_rate)
+    if args.pretrain_type == 'xgb':
+        model = PreprocessXgbModel(args.pretrain_path)
+        internal_splits = model.get_internal_splits()
+    else:
+        model = PreprocessSklModel(args.pretrain_path)
+        internal_splits = model.get_internal_splits(feature_names)
+
+    # if args.model_type == 'regression':
+    #     gbdt = GBDTRegressor(
+    #         args.learning_rate, 
+    #         args.max_tree_depth, 
+    #         args.max_tree_nums, 
+    #         SquaresError()
+    #         )
+
+    # elif args.model_type == 'binary_cf':
+    #     gbdt = GBDTBinaryClassifier(
+    #         args.learning_rate, 
+    #         args.max_tree_depth, 
+    #         args.max_tree_nums, 
+    #         BinomialDeviance()
+    #         )
+            
+    # elif args.model_type == 'multi_cf':
+    #     gbdt = GBDTMultiClassifier(
+    #         args.learning_rate, 
+    #         args.max_tree_depth, 
+    #         args.max_tree_nums, 
+    #         MultinomialDeviance()
+    #         )
+    # else:
+    #     raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
+
+
 
 # class BasePSORunner(object):
 
