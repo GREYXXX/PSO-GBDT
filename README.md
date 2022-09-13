@@ -94,7 +94,7 @@ Run SGBDT:
 
 Run PSGBDT:
 
-```python run.py --dataset_path kc_house_data.csv --model_type regression --pretrain_file kc_house.pkl --pretrain_type xgb``
+```python run.py --dataset_path kc_house_data.csv --model_type regression --pretrain_file kc_house.pkl --pretrain_type xgb```
 
 
 
