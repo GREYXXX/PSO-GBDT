@@ -1,7 +1,7 @@
 # @Author XI RAO
 # CITS4001 Research Project
 
-from typing import List
+from typing import List, Tuple
 import pandas as pd
 import random
 from sklearn.utils import shuffle
@@ -32,12 +32,12 @@ class DataSet:
     def encode_table(
         self, 
         use_pretrain : bool = False, 
-        pretrain_nodes : List[int] = []
+        internal_splits : List[Tuple[str, float]] = []
         )-> None:
         """Make an hash table to bind the (feature, feature value)"""
 
         if use_pretrain:
-            self.merge_values = [i for i in pretrain_nodes]
+            self.merge_values = [i for i in internal_splits]
         else:
             if self.is_bin:
                 bins = GetBins(self.train, self.columns,max_bin = 100)

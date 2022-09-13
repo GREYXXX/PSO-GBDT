@@ -42,14 +42,61 @@ To run the PSGBDT for regression task, you would need to comment line 223 and un
 
 ## Gradient Boosting Decision Tree Training using PSO
 
-### TODO
+### Packages Required
 
-1. Modify data.py. Re-organise encoding and data preprocessing.
-2. Make PSO input as (X : pd.DataFrame/np.array, y : pd.DataFrame/np.array)
-3. Finish PSO runner, make training more scalable and reusable.
-4. Add gbdt training with normal decision tree. (Attempt bitvector for decision tree base class ? To speed up DFS) 
-5. Add pso training for single decision tree and random forest.
-6. Experiment for GBDT (ODT, DT) , RF (ODT?, DT), DT. 
+<p>In order to run the main program, you need to install the following packages.</p>
+<p>These packages are:</p>
+
+<ul>
+    <li>Numpy</li>
+    <li>Pandas</li>
+    <li>XGBoost</li>
+    <li>Sklearn</li>
+    <li>CatBoost</li>
+    <li>pickle</li>
+    <li>matplotlib</li>
+</ul>
+
+### Experiment
+
+Use the following command to run experiment for both SGBDT and PSGBDT.
+
+Run SGBDT by ``` python run.py ```
+
+You can specify the dataset path by ``` --dataset_path $dataset name``` , currelty support 
+
+<ul>
+    <li>BankNote.csv (classification)<li>
+    <li>wine.csv (classification)<li>
+    <li>winequality-red.csv (regression)<li>
+    <li>higgs_0.005.csv (classification)<li>
+    <li>covat_0.3.csv (classification)<li>
+    <li>insurance.csv (regression)<li>
+    <li>kc_house_data.csv (regression)<li>
+<ul>
+
+and ``` --model_type ``` need to be specified by 
+
+<ul>
+    <li>binary_cf<li>
+    <li>regressiom<li>
+<ul>
+
+with respect to the type of dataset
+
+Run PSGBDT by specifying the ``` --pretrain_file ``` and ``` --pretrain_type ```, pretrain files are under the folder ``` pretrain_models ```. And ``` --pretrain_type ``` needs to set as either ```xgb``` or ```skr```
+
+### Example
+
+Run SGBDT:
+
+```python run.py --dataset_path kc_house_data.csv --model_type regression```
+
+Run PSGBDT:
+
+```python run.py --dataset_path kc_house_data.csv --model_type regression --pretrain_file kc_house.pkl --pretrain_type xgb``
+
+
 
 
 

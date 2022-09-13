@@ -98,8 +98,8 @@ class PSO:
         learning_rate : int = 0.3, 
         max_tree_depth : int = 4, 
         model_type : str = 'regression', 
-        beta : float = 1, 
-        alfa : float = 1
+        beta : float = 0.45, 
+        alfa : float = 0.45
     ):
 
         self.iterations = iterations
@@ -145,7 +145,7 @@ class PSO:
         for i in range(self.size_population):
             self.gbdt.build_gbdt(dataset = dataset)
             solution = self.gbdt.get_gbdt_array()
-            self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            self.particles.append(Particle(solution, self.get_fitness(dataset=dataset), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
 
@@ -158,13 +158,13 @@ class PSO:
             )
             self.gbdt.build_gbdt(dataset = dataset, tree_array = sample_nodes)
             solution = self.gbdt.get_gbdt_array()
-            self.get_fitness(self.gbdt)
-            self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            self.particles.append(Particle(solution, self.get_fitness(dataset=dataset), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
     
     def get_fitness(self, dataset : DataSet) -> float:
-        predict = self.gbdt.predict(dataset)
+        train_data = dataset.get_train_data()
+        predict = self.gbdt.predict(train_data)
 
         if self.model_type == 'regression':
             #RMSE should be as small as possible, so negate the value make the fitness as big as possible
@@ -184,7 +184,7 @@ class PSO:
         self, 
         X : pd.DataFrame, 
         y : pd.Series, 
-        pretrain_nodes : List[int] = [],
+        internal_splits : List[Tuple[str, float]] = [],
         use_pretrain : bool = False
         )-> None:
 
@@ -193,11 +193,12 @@ class PSO:
         if not use_pretrain:
             dataset.encode_table()
         else:
-            dataset.encode_table(use_pretrain = use_pretrain, pretrain_nodes = pretrain_nodes)
+            dataset.encode_table(use_pretrain = use_pretrain, internal_splits = internal_splits)
 
         # Init particles
-        if use_pretrain or len(pretrain_nodes) > 1:
-            self.init_swarm_with_nodes(dataset = dataset, pretrain_nodes = pretrain_nodes)
+        if use_pretrain:
+            pretrain_discrete_arrays = [dataset.get_index(val) for val in internal_splits]
+            self.init_swarm_with_nodes(dataset = dataset, pretrain_nodes = pretrain_discrete_arrays)
         else:
             self.init_swarm(dataset = dataset)
 
@@ -254,10 +255,10 @@ class PSO:
 
                 # updates the current solution
                 par.set_current_solution(solution_particle)
-                self.gbdt.build_gbdt(self.dataset, solution_particle)
+                self.gbdt.build_gbdt(dataset, solution_particle)
 
                 # gets cost of the current solution
-                cost_current_solution = round(self.get_fitness(self.gbdt), 5)
+                cost_current_solution = round(self.get_fitness(dataset), 5)
 
                 # record_fit.append(cost_current_solution)
                 # updates the cost of the current solution
