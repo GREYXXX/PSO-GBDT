@@ -7,12 +7,6 @@ import random
 from sklearn.utils import shuffle
 from make_bins import GetBins
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-
-class DataSet:
-
-    def __init__(self) -> None:
-        pass
 
 class DataSet:
 
