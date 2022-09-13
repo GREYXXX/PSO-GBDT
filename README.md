@@ -66,21 +66,21 @@ Run SGBDT by ``` python run.py ```
 You can specify the dataset path by ``` --dataset_path $dataset name``` , currelty support 
 
 <ul>
-    <li>BankNote.csv (classification)<li>
-    <li>wine.csv (classification)<li>
-    <li>winequality-red.csv (regression)<li>
-    <li>higgs_0.005.csv (classification)<li>
-    <li>covat_0.3.csv (classification)<li>
-    <li>insurance.csv (regression)<li>
-    <li>kc_house_data.csv (regression)<li>
-<ul>
+    <li>BankNote.csv (classification)</li>
+    <li>wine.csv (classification)</li>
+    <li>winequality-red.csv (regression)</li>
+    <li>higgs_0.005.csv (classification)</li>
+    <li>covat_0.3.csv (classification)</li>
+    <li>insurance.csv (regression)</li>
+    <li>kc_house_data.csv (regression)</li>
+</ul>
 
 and ``` --model_type ``` need to be specified by 
 
 <ul>
-    <li>binary_cf<li>
-    <li>regressiom<li>
-<ul>
+    <li>binary_cf</li>
+    <li>regressiom</li>
+</ul>
 
 with respect to the type of dataset
 
