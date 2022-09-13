@@ -102,9 +102,3 @@ if __name__ == "__main__":
         pso.run(X, y)
     
     print('gbest: %s | cost: %f\n' % (pso.get_gbest().get_pbest(), pso.get_gbest().get_cost_pbest()))
-
-
-
-
-
-

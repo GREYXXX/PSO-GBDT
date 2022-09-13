@@ -1,6 +1,7 @@
 # pretrain_models/*
 images/*
 train_models/*
+catboost_info/*
 
 .DS_Store
 __pycache__
