@@ -1,78 +1,60 @@
 # @Author XI RAO
 # CITS4001 Research Project
 
+from typing import List, Tuple
 import pandas as pd
 import random
 from sklearn.utils import shuffle
 from make_bins import GetBins
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
 
 class DataSet:
 
-    def __init__(self, train, test, target_name, standardize=False, is_bin = False):
-        """Data preprocessing"""
+    def __init__(
+        self, 
+        X : pd.DataFrame, 
+        y : pd.Series,  
+        is_bin : bool = False,
+        )-> None:
 
-        #Make default col name of regression and binary classification called label
-        label_name =target_name
-        if label_name != "label":
-            self.train = train.rename({label_name : 'label'}, axis=1)
-            self.test  = test.rename({label_name : 'label'}, axis=1)
-        else:
-            self.train = train
-            self.test  = test
-
-        #For binary classification, use 0 as neg sample, 1 as pos sample
-        if len(pd.unique(self.train['label'])) == 2:
-            self.train['label'] = self.train['label'].apply(lambda x : int(0) if x <= 0 else int(1))
-            self.test['label']  = self.test['label'].apply(lambda x : int(0) if x <= 0 else int(1))
-        
-        #Nomalized the feature
-        if standardize:
-            self.train.iloc[:,0:-1] = scaler.fit_transform(self.df.iloc[:,0:-1].to_numpy())
-            self.test.iloc[:,0:-1]  = scaler.fit_transform(self.df.iloc[:,0:-1].to_numpy())
-            print("Nomalized!")
-
-        self.columns = self.train.columns[:-1]
-        self.df = pd.concat([self.train, self.test],axis=0,ignore_index=True)
+        self.train = pd.concat([X, y], axis = 1).rename(columns = {y.name : 'label'})
         self.is_bin = is_bin
+        self.bins = None
 
+        self.columns = X.columns[:]
 
-    def encode_table(self, pretrained = False, pretrain_arrays = []):
+    def encode_table(
+        self, 
+        use_pretrain : bool = False, 
+        internal_splits : List[Tuple[str, float]] = []
+        )-> None:
         """Make an hash table to bind the (feature, feature value)"""
 
-        if pretrained:
-            self.merge_values = [i for i in pretrain_arrays]
+        if use_pretrain:
+            self.merge_values = [i for i in internal_splits]
         else:
             if self.is_bin:
-                bins = GetBins(self.train, self.columns, max_bin = 100)
+                bins = GetBins(self.train, self.columns,max_bin = 100)
                 bins = {i : bins[i][1:-1] for i in bins}
                 self.bins = bins
-                self.unique_values = [(col, bins[col]) for col in self.train.columns[:self.train.columns.get_loc('label')]]
+                self.unique_values = [(col, bins[col]) for col in self.columns]
             else:
-                self.unique_values = [(col, list(pd.unique(self.train[col]))) 
-                                                for col in self.train.columns[:self.train.columns.get_loc('label')]]
+                self.unique_values = [(col, pd.unique(self.train[col])) for col in self.columns]
             
             self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]] 
 
         self.lookup_tables = {i: self.merge_values[i] for i in range(len(self.merge_values))}
 
-    def get_data(self):
-        return self.df.copy()
-
     def get_train_data(self):
         return self.train.copy()
-    
-    def get_test_data(self):
-        return self.test.copy()
 
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""
 
-        if self.is_bin:
+        if self.is_bin and self.bins != None:
             columns = [i for i in self.bins if len(self.bins[i]) > 0]
             f = columns[random.randint(0, len(columns) - 1)]
-            fval =  self.bins[f][random.randint(0, len(self.bins[f]) - 1)]
+            fval = self.bins[f][random.randint(0, len(self.bins[f]) - 1)]
             return (f, fval)
 
         else:
@@ -110,6 +92,3 @@ class DataSet:
 
     def is_repeat(self):
         return len(set(self.merge_values)) == len(self.merge_values)
-
-    def get_reamin_data(self, indexs):
-        return self.df.loc[indexs]
