@@ -1,8 +1,11 @@
+from typing import List
 from Tree import Tree
 import pandas as pd
 import warnings
 import time
 import numpy as np
+
+from data import DataSet
 warnings.filterwarnings("ignore")
 
 
@@ -32,7 +35,11 @@ class BaseGBDT:
         self.tree_loss = []
         self.residuals = []
 
-    def build_gbdt(self, dataset, tree_array):
+    def build_gbdt(
+        self, 
+        dataset : DataSet, 
+        tree_array: List[int] = []
+        ):
         data = dataset.get_train_data()
         self.f_0 = self.loss.initialize_f_0(data)
         cut_tree_array = []

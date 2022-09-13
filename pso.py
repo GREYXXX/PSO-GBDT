@@ -2,13 +2,15 @@
 # CITS4001 Research Project
 
 import random
-import re
+from tkinter import NONE
 import numpy as np
-from Tree import Tree
+from Tree import Node, Tree
 from GBDT import GBDTRegressor, GBDTMultiClassifier, GBDTBinaryClassifier
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from data import DataSet
 from operator import attrgetter
+import pandas as pd
+from typing import List, Tuple
 
 
 
@@ -89,25 +91,19 @@ class Particle:
 class PSO:
 
     def __init__(
-        self, 
-        dataset, 
-        iterations, 
-        size_population, 
-        pretrain_nodes = [],
-        pretrained = False, 
-        max_tree_nums=5, 
-        learning_rate = 0.3, 
-        max_tree_depth = 4, 
-        model_type='regression', 
-        beta=1, 
-        alfa=1
+        self,  
+        iterations : int, 
+        size_population : int, 
+        max_tree_nums : int = 5, 
+        learning_rate : int = 0.3, 
+        max_tree_depth : int = 4, 
+        model_type : str = 'regression', 
+        beta : float = 0.45, 
+        alfa : float = 0.45
     ):
 
-        self.dataset = dataset
         self.iterations = iterations
         self.size_population = size_population
-        self.pretrain_nodes = pretrain_nodes
-        self.pretrain = pretrained
         
         self.max_tree_nums = max_tree_nums
         self.learning_rate = learning_rate
@@ -143,42 +139,32 @@ class PSO:
                 )
         else:
             raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
-
-        #Init the particles
-        if pretrained or len(pretrain_nodes) > 1:
-            self.init_swarm_with_nodes()
-        else:
-            self.init_swarm()
-        
-    
-    def init_swarm(self):
+       
+    def init_swarm(self, dataset : DataSet) -> None:
         print("Train without pretrain, and Particle initialization start....")
         for i in range(self.size_population):
-            self.gbdt.build_gbdt(self.dataset, [])
+            self.gbdt.build_gbdt(dataset = dataset)
             solution = self.gbdt.get_gbdt_array()
-            self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            self.particles.append(Particle(solution, self.get_fitness(dataset=dataset), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
 
-   
-    def init_swarm_with_nodes(self):
+    def init_swarm_with_nodes(self, dataset : DataSet, pretrain_nodes : List[int])-> None:
         print("Train with pretrain, and Particle initialization start....")
         for i in range(self.size_population):
-            array = random.choices(
-                self.pretrain_nodes, 
+            sample_nodes = random.choices(
+                pretrain_nodes, 
                 k = self.max_tree_depth * self.max_tree_nums
-                )
-            self.gbdt.build_gbdt(self.dataset, array)
+            )
+            self.gbdt.build_gbdt(dataset = dataset, tree_array = sample_nodes)
             solution = self.gbdt.get_gbdt_array()
-            self.get_fitness(self.gbdt)
-            self.particles.append(Particle(solution, self.get_fitness(self.gbdt), i))
+            self.particles.append(Particle(solution, self.get_fitness(dataset=dataset), i))
             print("particle {} finished".format(i))
         print("Particle initialization finished")
-
     
-    def get_fitness(self, gbdt):
-        data = self.dataset.get_train_data()
-        predict = gbdt.predict(data)
+    def get_fitness(self, dataset : DataSet) -> float:
+        train_data = dataset.get_train_data()
+        predict = self.gbdt.predict(train_data)
 
         if self.model_type == 'regression':
             #RMSE should be as small as possible, so negate the value make the fitness as big as possible
@@ -190,13 +176,35 @@ class PSO:
 
         return fitness
 
-
     # set gbest (best particle of the population)
     def setGBest(self, new_gbest):
         self.gbest = new_gbest
 
-    def run(self):
+    def run(
+        self, 
+        X : pd.DataFrame, 
+        y : pd.Series, 
+        internal_splits : List[Tuple[str, float]] = [],
+        use_pretrain : bool = False
+        )-> None:
+
+        # Encoding dataset
+        dataset = DataSet(X, y)
+        if not use_pretrain:
+            dataset.encode_table()
+        else:
+            dataset.encode_table(use_pretrain = use_pretrain, internal_splits = internal_splits)
+
+        # Init particles
+        if use_pretrain:
+            pretrain_discrete_arrays = [dataset.get_index(val) for val in internal_splits]
+            self.init_swarm_with_nodes(dataset = dataset, pretrain_nodes = pretrain_discrete_arrays)
+        else:
+            self.init_swarm(dataset = dataset)
+
         # record_fit = []
+
+        #Init the particles
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
             self.gbest = max(self.particles, key=attrgetter('pbest_solution_fit'))
@@ -236,8 +244,7 @@ class PSO:
 
                         # append swap operator in the list of velocity
                         temp_velocity.append(swap_operator)
-
-                
+   
                 par.set_velocity(temp_velocity)
 
                 # generates new solution for particle
@@ -245,38 +252,14 @@ class PSO:
                     if random.random() <= swap_operator[2]:
                         # makes the swap
                         solution_particle[swap_operator[0]] = swap_operator[1]
-                
-                if self.model_type == 'regression':
-                    self.gbdt = GBDTRegressor(
-                        self.learning_rate, 
-                        self.max_tree_depth, 
-                        self.max_tree_nums, 
-                        SquaresError()
-                        )
-
-                elif self.model_type == 'binary_cf':
-                    self.gbdt = GBDTBinaryClassifier(
-                        self.learning_rate, 
-                        self.max_tree_depth, 
-                        self.max_tree_nums, 
-                        BinomialDeviance()
-                        )
-
-                elif self.model_type == 'multi_cf':
-                    self.gbdt = GBDTMultiClassifier(
-                        self.learning_rate, 
-                        self.max_tree_depth, 
-                        self.max_tree_nums, 
-                        MultinomialDeviance()
-                        )
-                else:
-                    raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
 
                 # updates the current solution
                 par.set_current_solution(solution_particle)
-                self.gbdt.build_gbdt(self.dataset, solution_particle)
+                self.gbdt.build_gbdt(dataset, solution_particle)
+
                 # gets cost of the current solution
-                cost_current_solution = round(self.get_fitness(self.gbdt), 5)
+                cost_current_solution = round(self.get_fitness(dataset), 5)
+
                 # record_fit.append(cost_current_solution)
                 # updates the cost of the current solution
                 par.set_cost_current_solution(cost_current_solution)

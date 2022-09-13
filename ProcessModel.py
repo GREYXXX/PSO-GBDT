@@ -17,7 +17,6 @@ class PreprocessXgbModel:
         self.tree_df['Yes'] = self.tree_df['Yes'].fillna('0')
         self.tree_df['No'] = self.tree_df['No'].fillna('0')
         self.df_table = {i : self.tree_df[self.tree_df['Tree'] == i] for i in range(self.n_trees)}
-
     
     def get_model(self):
         return self.model 
@@ -70,9 +69,6 @@ class PreprocessXgbModel:
         feature, merge, child = self.__get_tree_infos(df)
         trees_array = [(feature[i], merge[i], child[i]) for i in range(len(df))]
         return trees_array
-
-
-
 
 class PreprocessSklModel:
     def __init__(self, file):
