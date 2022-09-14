@@ -118,7 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_tree_depth', type=int, default=os.getenv('MAX_TREE_DEPTH', 5))
     parser.add_argument('--num_bins', type=int, default=os.getenv('NUM_OF_BINS', -1))
     parser.add_argument('--pretrain_file', type=str, default=os.getenv('PRETRAIN_FILE', ''))
-    parser.add_argument('--pretrain_type', type=str, default=os.getenv('PRETRAIN_TYPE', 'skl'))
+    parser.add_argument('--pretrain_type', type=str, default=os.getenv('PRETRAIN_TYPE', ''))
 
     # parser.add_argument('--alpha', type=float, default=os.getenv('ALPHA_FOR_PSO', 0.45))
     # parser.add_argument('--beta', type=float, default=os.getenv('BETA_FOR_PSO', 0.45))
@@ -164,7 +164,16 @@ if __name__ == "__main__":
     )
     
     result = {
+        'dataset_name' : args.dataset_path,
+        'model_type': args.model_type,
+        'size_population' : args.size_population,
+        'learning_rate' : args.lr,
+        'max_tree_nums' : args.max_tree_nums,
+        'max_tree_depth' : args.max_tree_depth,
         'training_acc (gbest_cost)' : gbest_cost,
+        'num_of_bins' : args.num_bins,
+        'iterations' : args.iterations,
+        'pretrain_type': args.pretrain_type,
         'testing_acc' : test_acc,
         'gbest_sequence' : gbest_array
     }
