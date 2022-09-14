@@ -7,6 +7,7 @@ import random
 from sklearn.utils import shuffle
 from make_bins import GetBins
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 class DataSet:
 
@@ -17,7 +18,11 @@ class DataSet:
         is_bin : bool = False,
         )-> None:
 
-        self.train = pd.concat([X, y], axis = 1).rename(columns = {y.name : 'label'})
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        self.train = pd.concat([X_train, y_train], axis = 1).rename(columns = {y.name : 'label'})
+        self.test = pd.concat([X_test, y_test], axis = 1).rename(columns = {y.name : 'label'})
+        self.df = pd.concat([X, y], axis = 1).rename(columns = {y.name : 'label'})
+
         self.is_bin = is_bin
         self.bins = None
 
@@ -34,12 +39,12 @@ class DataSet:
             self.merge_values = [i for i in internal_splits]
         else:
             if self.is_bin:
-                bins = GetBins(self.train, self.columns,max_bin = 100)
+                bins = GetBins(self.df, self.columns,max_bin = 100)
                 bins = {i : bins[i][1:-1] for i in bins}
                 self.bins = bins
                 self.unique_values = [(col, bins[col]) for col in self.columns]
             else:
-                self.unique_values = [(col, pd.unique(self.train[col])) for col in self.columns]
+                self.unique_values = [(col, pd.unique(self.df[col])) for col in self.columns]
             
             self.merge_values = [(e[0], i) for e in self.unique_values for i in e[1]] 
 
@@ -47,6 +52,9 @@ class DataSet:
 
     def get_train_data(self):
         return self.train.copy()
+
+    def get_test_data(self):
+        return self.test.copy()
 
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""
@@ -66,7 +74,7 @@ class DataSet:
             else:
                 f = columns[random.randint(0, columns.size - 1)]
 
-            fval =  self.train[f][random.randint(0, self.train.shape[0] - 1)]
+            fval =  self.df[f][random.randint(0, self.df.shape[0] - 1)]
             return (f, fval)
 
     def get_random_element(self):
@@ -76,7 +84,7 @@ class DataSet:
         f = self.columns[random.randint(0, self.columns.size - 1)]
 
         # randomly pick up a feature value belongs to the feature
-        fval =  self.train[f][random.randint(0, self.train.shape[0] - 1)]
+        fval =  self.df[f][random.randint(0, self.df.shape[0] - 1)]
         
         return (f, fval)
 
