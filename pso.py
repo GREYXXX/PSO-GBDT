@@ -271,11 +271,16 @@ class PSO:
                     par.set_cost_pbest(cost_current_solution)
 
             print("\n")
-    
+        self.dataset_obj = dataset
+
     # returns gbest (best particle of the population)
     def get_gbest(self):
         return self.gbest
     
     def get_gbest_records(self):
         return self.gbest_record
+
+    @property
+    def dataset(self):
+        return self.dataset_obj
 		

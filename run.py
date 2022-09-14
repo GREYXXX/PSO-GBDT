@@ -1,5 +1,5 @@
 
-from typing import Tuple
+from typing import List, Tuple
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
 from GBDT import GBDTRegressor, GBDTBinaryClassifier, GBDTMultiClassifier
@@ -16,6 +16,7 @@ import pickle
 import time
 from typing import Tuple
 import zipfile
+import json
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
@@ -49,10 +50,61 @@ def get_feature_and_targets(
         target_name = EXIST_FILE_NAMES[filename]
         with zipfile.ZipFile(zip_file) as zf:
             df = pd.read_csv(zf.open(base + filename))
+            if filename == 'wine.csv':
+                df[target_name] = df[target_name].apply(lambda x : 0 if x == "bad" else 1)
+            elif filename == 'higgs_0.005.csv':
+                df[target_name] = df[target_name].apply(lambda x : int(x))
+            elif filename == 'covat_0.3.csv':
+                df[target_name] = df[target_name].apply(lambda x : 1 if x > 1.0 else 0)
+            
             X = df.drop(target_name, axis=1)
             y = df[target_name]
     
     return X, y
+
+def inference(
+    args, 
+    dataset : DataSet,
+    gbest_arrary : List[int],
+    )-> float:
+
+    if args.model_type == 'regression':
+        gbdt = GBDTRegressor(
+            args.lr, 
+            args.max_tree_depth, 
+            args.max_tree_nums, 
+            SquaresError()
+        )
+
+    elif args.model_type == 'binary_cf':
+        gbdt = GBDTBinaryClassifier(
+            args.lr, 
+            args.max_tree_depth, 
+            args.max_tree_nums, 
+            BinomialDeviance()
+        )
+            
+    elif args.model_type == 'multi_cf':
+        gbdt = GBDTMultiClassifier(
+            args.lr, 
+            args.max_tree_depth, 
+            args.max_tree_nums, 
+            MultinomialDeviance()
+        )
+    else:
+        raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
+
+    gbdt.build_gbdt(dataset, gbest_arrary)
+
+    #Predict the results for test dataset
+    test_data = dataset.get_test_data()
+    predict = gbdt.predict(test_data)
+
+    #print the accuracy
+    test_acc = sum(predict['label'] == predict['predict_label']) / len(predict)
+    print(test_acc)
+
+    return test_acc
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -100,5 +152,33 @@ if __name__ == "__main__":
         pso.run(X, y, internal_splits, use_pretrain=True)
     else:
         pso.run(X, y)
+
+    gbest_array = pso.get_gbest().get_pbest()
+    gbest_cost = pso.get_gbest().get_cost_pbest()
+    print('gbest: %s | cost: %f\n' % (gbest_array, gbest_cost))
+
+    test_acc = inference(
+        args = args,
+        dataset = pso.dataset,
+        gbest_arrary = gbest_array,
+    )
     
-    print('gbest: %s | cost: %f\n' % (pso.get_gbest().get_pbest(), pso.get_gbest().get_cost_pbest()))
+    result = {
+        'training_acc (gbest_cost)' : gbest_cost,
+        'testing_acc' : test_acc,
+        'gbest_sequence' : gbest_array
+    }
+
+    result_dir_path = 'result/'
+    if not os.path.isdir(result_dir_path):
+        os.mkdir(result_dir_path)
+
+    if not args.pretrain_file:
+        out_name = os.path.join(result_dir_path, args.dataset_path.split('.')[0] + "_result.json")
+    else:
+        out_name = os.path.join(result_dir_path, args.dataset_path.split('.')[0] + "_pretrain_result.json")
+
+    with open(out_name, "w") as outfile:
+        json.dump(result, outfile)
+
+    # pickle.dump((pso.get_gbest().get_pbest()), open('train_models/' + args.dataset_path.split('.')[0] + '.pkl', "wb"))
