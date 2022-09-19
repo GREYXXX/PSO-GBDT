@@ -16,13 +16,21 @@ class DataSet:
         X : pd.DataFrame, 
         y : pd.Series,  
         is_bin : bool = False,
+        use_validation: bool = True,
         )-> None:
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        if use_validation:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42, stratify = y)
+            X_test, X_val, y_test, y_val = train_test_split(X_train, y_train, test_size = 0.5, random_state=42)
+            self.validation =  pd.concat([X_val, y_val], axis = 1).rename(columns = {y.name : 'label'})
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
         self.train = pd.concat([X_train, y_train], axis = 1).rename(columns = {y.name : 'label'})
         self.test = pd.concat([X_test, y_test], axis = 1).rename(columns = {y.name : 'label'})
         self.df = pd.concat([X, y], axis = 1).rename(columns = {y.name : 'label'})
-
+        
+        self.use_validation = use_validation
         self.is_bin = is_bin
         self.bins = None
 
@@ -55,6 +63,12 @@ class DataSet:
 
     def get_test_data(self):
         return self.test.copy()
+
+    def get_fitness_test_data(self):
+        if self.use_validation:
+            return self.validation
+        else:
+            return self.train
 
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""

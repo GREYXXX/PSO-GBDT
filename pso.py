@@ -92,12 +92,12 @@ class PSO:
 
     def __init__(
         self,  
-        iterations : int, 
-        size_population : int, 
-        max_tree_nums : int = 5, 
-        learning_rate : int = 0.3, 
-        max_tree_depth : int = 4, 
-        model_type : str = 'regression', 
+        iterations : int = 20, 
+        size_population : int = 50, 
+        max_tree_nums : int = 6, 
+        learning_rate : float = 0.1, 
+        max_tree_depth : int = 5, 
+        model_type : str = 'binary_cf', 
         beta : float = 0.45, 
         alfa : float = 0.45
     ):
@@ -140,7 +140,7 @@ class PSO:
         else:
             raise ValueError("Invalid model type. Requires a valid model type: regression, binary_cf or multi_cf")
        
-    def init_swarm(self, dataset : DataSet) -> None:
+    def init_swarm(self, dataset : DataSet)-> None:
         print("Train without pretrain, and Particle initialization start....")
         for i in range(self.size_population):
             self.gbdt.build_gbdt(dataset = dataset)
@@ -163,7 +163,7 @@ class PSO:
         print("Particle initialization finished")
     
     def get_fitness(self, dataset : DataSet) -> float:
-        train_data = dataset.get_train_data()
+        train_data = dataset.get_fitness_test_data()
         predict = self.gbdt.predict(train_data)
 
         if self.model_type == 'regression':
@@ -185,11 +185,12 @@ class PSO:
         X : pd.DataFrame, 
         y : pd.Series, 
         internal_splits : List[Tuple[str, float]] = [],
-        use_pretrain : bool = False
+        use_pretrain : bool = False,
+        use_validation : bool = True,
         )-> None:
 
         # Encoding dataset
-        dataset = DataSet(X, y)
+        dataset = DataSet(X, y, use_validation = use_validation)
         if not use_pretrain:
             dataset.encode_table()
         else:
