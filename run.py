@@ -119,6 +119,8 @@ if __name__ == "__main__":
     parser.add_argument('--num_bins', type=int, default=os.getenv('NUM_OF_BINS', -1))
     parser.add_argument('--pretrain_file', type=str, default=os.getenv('PRETRAIN_FILE', ''))
     parser.add_argument('--pretrain_type', type=str, default=os.getenv('PRETRAIN_TYPE', ''))
+    parser.add_argument('--use_validation', type=bool, default=os.getenv('IF_USE_VALIDATION', True))
+    parser.add_argument('--direct_pretrain', type=bool, default=os.getenv('IF_USE_DIRECT_PRATRAIN_RESULT', False))
 
     # parser.add_argument('--alpha', type=float, default=os.getenv('ALPHA_FOR_PSO', 0.45))
     # parser.add_argument('--beta', type=float, default=os.getenv('BETA_FOR_PSO', 0.45))
@@ -139,19 +141,65 @@ if __name__ == "__main__":
         model_type=args.model_type
     )
 
-    if args.pretrain_file != '':
+    if args.pretrain_file != '' and not args.direct_pretrain:
+        file = os.path.join(base_pretrain_path, args.pretrain_file)
+        pretrain_model = pickle.load(open(file, "rb"))
         if args.pretrain_type == 'xgb':
-            model = PreprocessXgbModel(os.path.join(base_pretrain_path, args.pretrain_file))
+            model = PreprocessXgbModel(pretrain_model)
             internal_splits = model.get_internal_splits()
         elif args.pretrain_type == 'skl':
-            model = PreprocessSklModel(os.path.join(base_pretrain_path, args.pretrain_file))
+            model = PreprocessSklModel(pretrain_model)
             internal_splits = model.get_internal_splits(X.columns.values)
         else:
             raise ValueError('This implementation only accept pretrain type for either xgb or skr')
 
-        pso.run(X, y, internal_splits, use_pretrain=True)
+        pso.run(
+            X, 
+            y, 
+            internal_splits=internal_splits, 
+            use_pretrain=True, 
+            use_validation=args.use_validation,
+        )
+        
+    elif args.pretrain_file == '' and args.direct_pretrain:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        if args.pretrain_type == 'xgb':
+            print('pretraining with XGBoost start ...')
+            xgbd = xgb.XGBClassifier(
+                n_estimators=args.max_tree_nums, 
+                learning_rate=args.lr, 
+                max_depth=args.max_tree_depth - 1
+            )
+            xgbd.fit(X_train, y_train)
+            model = PreprocessXgbModel(model=xgbd)
+            internal_splits = model.get_internal_splits()
+
+        elif args.pretrain_type == 'skr':
+            print('pretraining with Sklearn GBM start ...')
+            skgb = GradientBoostingClassifier(
+                n_estimators=args.max_tree_nums, 
+                learning_rate=args.lr, 
+                max_depth=args.max_tree_depth - 1
+            )
+            skgb.fit(X_train, y_train)
+            model = PreprocessXgbModel(model=skgb)
+            internal_splits = model.get_internal_splits()
+        
+        print('pretraining done ...')
+        pso.run(
+            X, 
+            y, 
+            internal_splits=internal_splits, 
+            use_pretrain=True, 
+            use_validation=args.use_validation,
+        )
+
     else:
-        pso.run(X, y)
+        pso.run(
+            X, 
+            y,
+            use_validation=args.use_validation,
+        )
 
     gbest_array = pso.get_gbest().get_pbest()
     gbest_cost = pso.get_gbest().get_cost_pbest()
