@@ -71,7 +71,7 @@ class Tree(object):
         self.max_depth = max_depth
         self.tree_input = tree_input
         self.tree_id = tree_id
-        self.id =0
+        self.id = 0
         self.leaf_nodes = []
 
         #tree_array is used to record the internal nodes

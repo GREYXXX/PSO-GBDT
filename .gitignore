@@ -1,0 +1,8 @@
+# pretrain_models/*
+images/*
+train_models/*
+catboost_info/*
+result/*
+
+.DS_Store
+__pycache__
