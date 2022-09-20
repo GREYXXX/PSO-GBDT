@@ -5,8 +5,8 @@ import pickle
 import numpy as np
 
 class PreprocessXgbModel:
-    def __init__(self, file):
-        self.model = pickle.load(open(file, "rb"))
+    def __init__(self, model):
+        self.model = model
         self.n_trees = self.model.n_estimators
         self.max_depth = self.model.max_depth
         self.learning_rate = self.model.learning_rate
@@ -71,8 +71,8 @@ class PreprocessXgbModel:
         return trees_array
 
 class PreprocessSklModel:
-    def __init__(self, file):
-        self.model = pickle.load(open(file, "rb"))
+    def __init__(self, model):
+        self.model = model
     
     def get_internal_splits(self, features_names):
         splits = []
