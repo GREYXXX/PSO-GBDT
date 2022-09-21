@@ -20,7 +20,7 @@ import json
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.metrics import accuracy_score,classification_report
 from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
@@ -171,24 +171,40 @@ if __name__ == "__main__":
         
         if args.pretrain_type == 'xgb':
             print('pretraining with XGBoost start ...')
-            xgbd = xgb.XGBClassifier(
-                n_estimators=args.max_tree_nums, 
-                learning_rate=args.lr, 
-                max_depth=args.max_tree_depth - 1
-            )
+            if args.model_type in ['binary_cf', 'multi_cf']:
+                xgbd = xgb.XGBClassifier(
+                    n_estimators=args.max_tree_nums, 
+                    learning_rate=args.lr, 
+                    max_depth=args.max_tree_depth - 1
+                )
+            else:
+                xgbd = xgb.XGBRegressor(
+                    n_estimators=args.max_tree_nums, 
+                    learning_rate=args.lr, 
+                    max_depth=args.max_tree_depth - 1
+                )
+
             xgbd.fit(X_train, y_train)
             model = PreprocessXgbModel(model=xgbd)
             internal_splits = model.get_internal_splits()
 
         elif args.pretrain_type == 'skr':
             print('pretraining with Sklearn GBM start ...')
-            skgb = GradientBoostingClassifier(
-                n_estimators=args.max_tree_nums, 
-                learning_rate=args.lr, 
-                max_depth=args.max_tree_depth - 1
-            )
+            if args.model_type in ['binary_cf', 'multi_cf']:
+                skgb = GradientBoostingClassifier(
+                    n_estimators=args.max_tree_nums, 
+                    learning_rate=args.lr, 
+                    max_depth=args.max_tree_depth - 1
+                )
+            else:
+                skgb = GradientBoostingRegressor(
+                    n_estimators=args.max_tree_nums, 
+                    learning_rate=args.lr, 
+                    max_depth=args.max_tree_depth - 1
+                )
+
             skgb.fit(X_train, y_train)
-            model = PreprocessXgbModel(model=skgb)
+            model = PreprocessSklModel(model=skgb)
             internal_splits = model.get_internal_splits()
         
         else:
