@@ -66,7 +66,7 @@ def inference(
     args, 
     dataset : DataSet,
     gbest_arrary : List[int],
-    )-> float:
+    )-> str:
 
     if args.model_type == 'regression':
         gbdt = GBDTRegressor(
@@ -100,11 +100,16 @@ def inference(
     test_data = dataset.get_test_data()
     predict = gbdt.predict(test_data)
 
-    #print the accuracy
-    test_acc = sum(predict['label'] == predict['predict_label']) / len(predict)
-    print(test_acc)
+    #calc the accuracy or rmse
+    if args.model_type in ['binary_cf', 'multi_cf']:
+        test_result = sum(predict['label'] == predict['predict_label']) / len(predict)
+        test_result = '{0:.4f}'.format(test_result)
+    else:
+        test_result = ((predict['predict_value'] - predict['label']) ** 2).mean() ** .5
+        test_result = '{0:.4E}'.format(test_result)
+    print(f"test result is {test_result }")
 
-    return test_acc
+    return test_result 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -163,6 +168,7 @@ if __name__ == "__main__":
         
     elif args.pretrain_file == '' and args.direct_pretrain:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
         if args.pretrain_type == 'xgb':
             print('pretraining with XGBoost start ...')
             xgbd = xgb.XGBClassifier(
@@ -185,6 +191,9 @@ if __name__ == "__main__":
             model = PreprocessXgbModel(model=skgb)
             internal_splits = model.get_internal_splits()
         
+        else:
+            raise ValueError('This implementation only accept pretrain type for either xgb or skr')
+        
         print('pretraining done ...')
         pso.run(
             X, 
@@ -205,7 +214,7 @@ if __name__ == "__main__":
     gbest_cost = pso.get_gbest().get_cost_pbest()
     print('gbest: %s | cost: %f\n' % (gbest_array, gbest_cost))
 
-    test_acc = inference(
+    test_result = inference(
         args = args,
         dataset = pso.dataset,
         gbest_arrary = gbest_array,
@@ -218,11 +227,11 @@ if __name__ == "__main__":
         'learning_rate' : args.lr,
         'max_tree_nums' : args.max_tree_nums,
         'max_tree_depth' : args.max_tree_depth,
-        'training_acc (gbest_cost)' : gbest_cost,
+        'training_result (gbest_cost)' : gbest_cost,
         'num_of_bins' : args.num_bins,
         'iterations' : args.iterations,
         'pretrain_type': args.pretrain_type,
-        'testing_acc' : test_acc,
+        'testing_result' : test_result,
         'gbest_sequence' : gbest_array
     }
 
@@ -230,8 +239,10 @@ if __name__ == "__main__":
     if not os.path.isdir(result_dir_path):
         os.mkdir(result_dir_path)
 
-    if not args.pretrain_file:
+    if not args.pretrain_file and not args.direct_pretrain:
         out_name = os.path.join(result_dir_path, args.dataset_path.split('.')[0] + "_result.json")
+    elif args.pretrain_file == '' and args.direct_pretrain:
+        out_name = os.path.join(result_dir_path, args.dataset_path.split('.')[0] + "_direct_pretrain_result.json")
     else:
         out_name = os.path.join(result_dir_path, args.dataset_path.split('.')[0] + "_pretrain_result.json")
 
