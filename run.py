@@ -1,4 +1,3 @@
-
 from typing import List, Tuple
 from data import DataSet
 from loss import SquaresError, BinomialDeviance, MultinomialDeviance
@@ -56,6 +55,12 @@ def get_feature_and_targets(
                 df[target_name] = df[target_name].apply(lambda x : int(x))
             elif filename == 'covat_0.3.csv':
                 df[target_name] = df[target_name].apply(lambda x : 1 if x > 1.0 else 0)
+            elif filename == 'kc_house_data.csv':
+                df = df.drop(['id', 'date'],axis=1)
+            elif filename == 'insurance':
+                df['smoker'] = pd.factorize(df['smoker'])[0]
+                df['sex'] = pd.factorize(df['sex'])[0]
+                df['region'] = pd.factorize(df['smoker'])[0]
             
             X = df.drop(target_name, axis=1)
             y = df[target_name]
@@ -121,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=os.getenv('LEARNING_RATE', 1))
     parser.add_argument('--max_tree_nums', type=int, default=os.getenv('MAX_TREE_NUM', 6))
     parser.add_argument('--max_tree_depth', type=int, default=os.getenv('MAX_TREE_DEPTH', 5))
-    parser.add_argument('--num_bins', type=int, default=os.getenv('NUM_OF_BINS', -1))
+    parser.add_argument('--max_bins', type=int, default=os.getenv('MAX_BINS_NUM', -1))
     parser.add_argument('--pretrain_file', type=str, default=os.getenv('PRETRAIN_FILE', ''))
     parser.add_argument('--pretrain_type', type=str, default=os.getenv('PRETRAIN_TYPE', ''))
     parser.add_argument('--use_validation', type=bool, default=os.getenv('IF_USE_VALIDATION', True))
@@ -178,6 +183,7 @@ if __name__ == "__main__":
                     max_depth=args.max_tree_depth - 1
                 )
             else:
+                print('use xgb regressor')
                 xgbd = xgb.XGBRegressor(
                     n_estimators=args.max_tree_nums, 
                     learning_rate=args.lr, 
@@ -224,6 +230,8 @@ if __name__ == "__main__":
             X, 
             y,
             use_validation=args.use_validation,
+            use_pretrain=False,
+            max_bins=args.max_bins,
         )
 
     gbest_array = pso.get_gbest().get_pbest()
@@ -244,7 +252,7 @@ if __name__ == "__main__":
         'max_tree_nums' : args.max_tree_nums,
         'max_tree_depth' : args.max_tree_depth,
         'training_result (gbest_cost)' : gbest_cost,
-        'num_of_bins' : args.num_bins,
+        'max_bins' : args.max_bins,
         'iterations' : args.iterations,
         'pretrain_type': args.pretrain_type,
         'testing_result' : test_result,

@@ -15,12 +15,12 @@ class DataSet:
         self, 
         X : pd.DataFrame, 
         y : pd.Series,  
-        is_bin : bool = False,
+        max_bins : int = -1,
         use_validation: bool = True,
         )-> None:
 
         if use_validation:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42, stratify = y)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
             X_test, X_val, y_test, y_val = train_test_split(X_train, y_train, test_size = 0.5, random_state=42)
             self.validation =  pd.concat([X_val, y_val], axis = 1).rename(columns = {y.name : 'label'})
         else:
@@ -31,7 +31,7 @@ class DataSet:
         self.df = pd.concat([X, y], axis = 1).rename(columns = {y.name : 'label'})
         
         self.use_validation = use_validation
-        self.is_bin = is_bin
+        self.max_bins = max_bins
         self.bins = None
 
         self.columns = X.columns[:]
@@ -46,8 +46,13 @@ class DataSet:
         if use_pretrain:
             self.merge_values = [i for i in internal_splits]
         else:
-            if self.is_bin:
-                bins = GetBins(self.df, self.columns,max_bin = 100)
+            if self.max_bins > 0:
+                print(f"use bin with {self.max_bins}")
+                bins = GetBins(
+                    self.df, 
+                    self.columns, 
+                    max_bin = self.max_bins,
+                )
                 bins = {i : bins[i][1:-1] for i in bins}
                 self.bins = bins
                 self.unique_values = [(col, bins[col]) for col in self.columns]
@@ -73,7 +78,7 @@ class DataSet:
     def get_random_elements(self, drops):
         """Return a random (feature, feature value)"""
 
-        if self.is_bin and self.bins != None:
+        if self.max_bins > 0 and self.bins != None:
             columns = [i for i in self.bins if len(self.bins[i]) > 0]
             f = columns[random.randint(0, len(columns) - 1)]
             fval = self.bins[f][random.randint(0, len(self.bins[f]) - 1)]
