@@ -187,25 +187,27 @@ class PSO:
         internal_splits : List[Tuple[str, float]] = [],
         use_pretrain : bool = False,
         use_validation : bool = True,
+        max_bins : int = -1,
         )-> None:
 
         # Encoding dataset
-        dataset = DataSet(X, y, use_validation = use_validation)
+        dataset = DataSet(
+            X, 
+            y, 
+            use_validation = use_validation, 
+            max_bins = max_bins,    
+        )
+
         if not use_pretrain:
             dataset.encode_table()
+            self.init_swarm(dataset = dataset)
         else:
             dataset.encode_table(use_pretrain = use_pretrain, internal_splits = internal_splits)
-
-        # Init particles
-        if use_pretrain:
             pretrain_discrete_arrays = [dataset.get_index(val) for val in internal_splits]
             self.init_swarm_with_nodes(dataset = dataset, pretrain_nodes = pretrain_discrete_arrays)
-        else:
-            self.init_swarm(dataset = dataset)
 
         # record_fit = []
-
-        #Init the particles
+        # Init the particles
         for iter in range(self.iterations):
             # updates gbest (best particle of the population)
             self.gbest = max(self.particles, key=attrgetter('pbest_solution_fit'))
