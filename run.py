@@ -57,11 +57,11 @@ def get_feature_and_targets(
                 df[target_name] = df[target_name].apply(lambda x : 1 if x > 1.0 else 0)
             elif filename == 'kc_house_data.csv':
                 df = df.drop(['id', 'date'],axis=1)
-            elif filename == 'insurance':
+            elif filename == 'insurance.csv':
                 df['smoker'] = pd.factorize(df['smoker'])[0]
                 df['sex'] = pd.factorize(df['sex'])[0]
-                df['region'] = pd.factorize(df['smoker'])[0]
-            
+                df['region'] = pd.factorize(df['region'])[0]
+
             X = df.drop(target_name, axis=1)
             y = df[target_name]
     
