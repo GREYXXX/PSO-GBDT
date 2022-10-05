@@ -42,7 +42,8 @@ def get_feature_and_targets(
         'winequality-red.csv' : 'quality',
         'higgs_0.005.csv' : '28',
         'covat_0.3.csv' : '54',
-        'kc_house_data.csv' : 'price'
+        'kc_house_data.csv' : 'price',
+        'real-sim_sample.csv' : 'label',
         }
 
     if filename in EXIST_FILE_NAMES.keys():
@@ -191,6 +192,8 @@ if __name__ == "__main__":
                 )
 
             xgbd.fit(X_train, y_train)
+            pretrain_train_result = xgbd.score(X_train, y_train)
+            pretrain_test_result = xgbd.score(X_test, y_test)
             model = PreprocessXgbModel(model=xgbd)
             internal_splits = model.get_internal_splits()
 
@@ -210,8 +213,10 @@ if __name__ == "__main__":
                 )
 
             skgb.fit(X_train, y_train)
+            pretrain_train_result = skgb.score(X_train, y_train)
+            pretrain_test_result = skgb.score(X_test, y_test)
             model = PreprocessSklModel(model=skgb)
-            internal_splits = model.get_internal_splits()
+            internal_splits = model.get_internal_splits(features_names=X_train.columns)
         
         else:
             raise ValueError('This implementation only accept pretrain type for either xgb or skr')
@@ -251,10 +256,12 @@ if __name__ == "__main__":
         'learning_rate' : args.lr,
         'max_tree_nums' : args.max_tree_nums,
         'max_tree_depth' : args.max_tree_depth,
+        'pretrain_train_result' : pretrain_train_result,
         'training_result (gbest_cost)' : gbest_cost,
         'max_bins' : args.max_bins,
         'iterations' : args.iterations,
         'pretrain_type': args.pretrain_type,
+        'pretrain_test_result' : pretrain_test_result,
         'testing_result' : test_result,
         'gbest_sequence' : gbest_array
     }
