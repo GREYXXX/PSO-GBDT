@@ -256,15 +256,17 @@ if __name__ == "__main__":
         'learning_rate' : args.lr,
         'max_tree_nums' : args.max_tree_nums,
         'max_tree_depth' : args.max_tree_depth,
-        'pretrain_train_result' : pretrain_train_result,
         'training_result (gbest_cost)' : gbest_cost,
         'max_bins' : args.max_bins,
         'iterations' : args.iterations,
         'pretrain_type': args.pretrain_type,
-        'pretrain_test_result' : pretrain_test_result,
         'testing_result' : test_result,
         'gbest_sequence' : gbest_array
     }
+    
+    if args.direct_pretrain:
+        result['pretrain_test_result'] = pretrain_test_result
+        result['pretrain_train_result'] = pretrain_train_result
 
     result_dir_path = 'result/'
     if not os.path.isdir(result_dir_path):
