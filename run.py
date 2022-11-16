@@ -44,6 +44,7 @@ def get_feature_and_targets(
         'covat_0.3.csv' : '54',
         'kc_house_data.csv' : 'price',
         'real-sim_sample.csv' : 'label',
+        'cpusmall.csv' : 'label'
         }
 
     if filename in EXIST_FILE_NAMES.keys():
